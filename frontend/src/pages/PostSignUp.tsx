@@ -256,6 +256,7 @@ function PostSignUp() {
             {userRole === "recruiter" && (
               <Card.Body>
                 <Form onSubmit={formikRecruiter.handleSubmit}>
+                  <Card.Title>Contact Number</Card.Title>
                   <Form.Group controlId="recruiterContact">
                     <Form.Control
                       type="tel"
@@ -277,6 +278,7 @@ function PostSignUp() {
                     </Form.Control.Feedback>
                   </Form.Group>
 
+                  <Card.Title>About you</Card.Title>
                   <Form.Group controlId="recruiterBio">
                     <Form.Control
                       as="textarea"
