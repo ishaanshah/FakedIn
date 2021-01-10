@@ -1,3 +1,4 @@
+import { useFormik } from "formik";
 import { useState } from "react";
 import { Facebook, Google, Twitter } from "react-bootstrap-icons";
 import Button from "react-bootstrap/Button";
@@ -7,7 +8,6 @@ import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Nav from "react-bootstrap/Nav";
 import Row from "react-bootstrap/Row";
-import { useFormik } from "formik";
 import * as Yup from "yup";
 
 const LoginSchema = Yup.object().shape({

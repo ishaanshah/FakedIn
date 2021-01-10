@@ -4,6 +4,7 @@ import ReactDOM from "react-dom";
 import App from "./App";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
+import "react-bootstrap-typeahead/css/Typeahead.css";
 
 ReactDOM.render(
   <React.StrictMode>
