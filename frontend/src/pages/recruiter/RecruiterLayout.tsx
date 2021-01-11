@@ -3,9 +3,7 @@ import Navbar from "react-bootstrap/Navbar";
 import { Link, Route } from "react-router-dom";
 import UserProfileDropdown from "../../components/UserProfileDropdown";
 
-function ApplicantLayout() {
-  const name = "Ishaan Shah";
-
+function RecruiterLayout() {
   return (
     <>
       <Navbar bg="light" variant="light">
@@ -13,23 +11,23 @@ function ApplicantLayout() {
           <b>FakedIn</b>
         </Navbar.Brand>
         <Nav className="mr-auto" activeKey={window.location.pathname}>
-          <Nav.Link eventKey="/applicant" as={Link} to="/applicant">
+          <Nav.Link eventKey="/recruiter" as={Link} to="/recruiter">
             Home
           </Nav.Link>
           <Nav.Link
-            eventKey="/applicant/my_applications"
+            eventKey="/recruiter/accepted"
             as={Link}
-            to="/applicant/my_applications"
+            to="/recruiter/accepted"
           >
-            My Applications
+            Accepted
           </Nav.Link>
         </Nav>
-        <UserProfileDropdown variant="applicant" />
       </Navbar>
+      <UserProfileDropdown variant="recruiter" />
 
-      <Route path="/applicant" exact></Route>
+      <Route path="/recruiter" exact></Route>
     </>
   );
 }
 
-export default ApplicantLayout;
+export default RecruiterLayout;
