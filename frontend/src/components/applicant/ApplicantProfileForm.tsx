@@ -25,7 +25,8 @@ const Skills = [
 ];
 
 const ApplicantSchema = Yup.object().shape({
-  applicantEducation: Yup.array()
+  name: Yup.string().required().label("Name"),
+  education: Yup.array()
     .of(
       Yup.object().shape({
         institutionName: Yup.string().required().label("Institution name"),
@@ -45,28 +46,29 @@ const ApplicantSchema = Yup.object().shape({
     .min(1)
     .required()
     .label("Education"),
-  applicantSkills: Yup.array()
+  skills: Yup.array()
     .of(Yup.string().required())
     .min(1)
     .required()
     .label("Skills"),
-  applicantResume: Yup.mixed().notRequired().default(null),
+  resume: Yup.mixed().notRequired().default(null),
 });
 
 type ApplicantProfileFormProps = {
   initialValues: {
-    applicantEducation: Array<{
+    name: string;
+    education: Array<{
       institutionName: string;
       startYear: number | string;
       endYear?: number | string;
     }>;
-    applicantSkills: Array<string>;
-    applicantResume?: File;
+    skills: Array<string>;
+    resume?: File;
   };
 };
 
 function ApplicantProfileForm({ initialValues }: ApplicantProfileFormProps) {
-  const formikApplicant = useFormik({
+  const formik = useFormik({
     initialValues,
     onSubmit: (values) => {
       alert(JSON.stringify(values, null, 2));
@@ -74,50 +76,60 @@ function ApplicantProfileForm({ initialValues }: ApplicantProfileFormProps) {
   });
 
   return (
-    <FormikProvider value={formikApplicant}>
-      <Form onSubmit={formikApplicant.handleSubmit}>
+    <FormikProvider value={formik}>
+      <Form onSubmit={formik.handleSubmit}>
+        <Card.Title>Name</Card.Title>
+        <Form.Group controlId="name">
+          <Form.Control
+            type="text"
+            placeholder="Name"
+            value={formik.values.name}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+          />
+        </Form.Group>
         <Card.Title>Education</Card.Title>
-        <FieldArray name="applicantEducation">
+        <FieldArray name="education">
           {({ insert, remove }) => (
             <>
-              {formikApplicant.values.applicantEducation.map((entry, idx) => (
+              {formik.values.education.map((entry, idx) => (
                 <Form.Row key={idx}>
                   <Col xs={4}>
                     <Field
                       as={Form.Group}
-                      controlId={`applicantEducation.${idx}.institutionName`}
+                      controlId={`education.${idx}.institutionName`}
                     >
                       <Form.Control
                         type="text"
                         placeholder="Institution Name"
                         value={entry.institutionName}
-                        onChange={formikApplicant.handleChange}
+                        onChange={formik.handleChange}
                       />
                     </Field>
                   </Col>
                   <Col xs={3}>
                     <Field
                       as={Form.Group}
-                      controlId={`applicantEducation.${idx}.startYear`}
+                      controlId={`education.${idx}.startYear`}
                     >
                       <Form.Control
                         type="number"
                         placeholder="Start Year"
                         value={entry.startYear}
-                        onChange={formikApplicant.handleChange}
+                        onChange={formik.handleChange}
                       />
                     </Field>
                   </Col>
                   <Col xs={3}>
                     <Field
                       as={Form.Group}
-                      controlId={`applicantEducation.${idx}.endYear`}
+                      controlId={`education.${idx}.endYear`}
                     >
                       <Form.Control
                         type="number"
                         placeholder="End Year"
                         value={entry.endYear}
-                        onChange={formikApplicant.handleChange}
+                        onChange={formik.handleChange}
                       />
                     </Field>
                   </Col>
@@ -137,9 +149,7 @@ function ApplicantProfileForm({ initialValues }: ApplicantProfileFormProps) {
                     &nbsp;&nbsp;
                     <Button
                       variant="dark"
-                      disabled={
-                        formikApplicant.values.applicantEducation.length === 1
-                      }
+                      disabled={formik.values.education.length === 1}
                     >
                       <X size={24} onClick={() => remove(idx)} />
                     </Button>
@@ -150,35 +160,30 @@ function ApplicantProfileForm({ initialValues }: ApplicantProfileFormProps) {
           )}
         </FieldArray>
         <Card.Title>Skills</Card.Title>
-        <Form.Group controlId="applicantSkills">
+        <Form.Group controlId="skills">
           <Typeahead
             id="skill-chooser"
             options={Skills}
             placeholder="Choose your skills..."
-            onChange={(selected) =>
-              formikApplicant.setFieldValue("applicantSkills", selected)
-            }
-            onBlur={() => formikApplicant.setFieldTouched("applicantSkills")}
-            selected={formikApplicant.values.applicantSkills}
+            onChange={(selected) => formik.setFieldValue("skills", selected)}
+            onBlur={() => formik.setFieldTouched("skills")}
+            selected={formik.values.skills}
             allowNew
             clearButton
             multiple
           />
         </Form.Group>
         <Card.Title>Resume</Card.Title>
-        <Form.Group controlId="applicantResume">
+        <Form.Group controlId="resume">
           <Form.File
             label={
-              formikApplicant.values.applicantResume
-                ? formikApplicant.values.applicantResume.name
+              formik.values.resume
+                ? formik.values.resume.name
                 : "Upload your resume"
             }
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
               if (event.currentTarget.files?.length) {
-                formikApplicant.setFieldValue(
-                  "applicantResume",
-                  event.currentTarget.files[0]
-                );
+                formik.setFieldValue("resume", event.currentTarget.files[0]);
               }
             }}
             custom

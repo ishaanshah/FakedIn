@@ -10,13 +10,14 @@ import RecruiterProfileForm from "../components/recruiter/RecruiterProfileForm";
 function PostSignUp() {
   // State denoting type of the user i.e Recruiter or Applicant
   const [userRole, setUserRole] = useState("applicant");
+  const name = "John Doe";
 
   return (
     <Container>
       <Row className="mt-5">
         <Col>
           <div style={{ fontSize: "3em" }}>
-            Hi <b>John Doe</b>!
+            Hi <b>{name}</b>!
           </div>
           <br />
           <div style={{ fontSize: "1.5em" }}>
@@ -50,14 +51,15 @@ function PostSignUp() {
               <Card.Body>
                 <ApplicantProfileForm
                   initialValues={{
-                    applicantEducation: [
+                    name,
+                    education: [
                       {
                         institutionName: "",
                         startYear: "",
                         endYear: "",
                       },
                     ],
-                    applicantSkills: [],
+                    skills: [],
                   }}
                 />
               </Card.Body>
@@ -66,8 +68,9 @@ function PostSignUp() {
               <Card.Body>
                 <RecruiterProfileForm
                   initialValues={{
-                    recruiterContact: "",
-                    recruiterBio: "",
+                    name,
+                    contact: "",
+                    bio: "",
                   }}
                 />
               </Card.Body>

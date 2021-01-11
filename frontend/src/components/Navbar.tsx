@@ -22,7 +22,7 @@ function CustomNavbar({ variant, entries }: CustomNavbarProps) {
       </Navbar.Brand>
       <Nav className="mr-auto">
         {entries.map((entry, idx) => (
-          <Nav.Link key={idx} as={NavLink} to={entry.path}>
+          <Nav.Link key={idx} as={NavLink} to={entry.path} exact>
             {entry.display}
           </Nav.Link>
         ))}
@@ -43,6 +43,7 @@ function CustomNavbar({ variant, entries }: CustomNavbarProps) {
             as={NavLink}
             to={`/${variant}/profile`}
             activeClassName="active"
+            exact
           >
             My profile
           </NavDropdown.Item>
