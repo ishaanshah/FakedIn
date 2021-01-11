@@ -1,5 +1,6 @@
 import { Route } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import ApplicantProfile from "./ApplicantProfile";
 
 function ApplicantLayout() {
   return (
@@ -19,6 +20,9 @@ function ApplicantLayout() {
       />
 
       <Route path="/applicant" exact></Route>
+      <Route path="/applicant/profile" exact>
+        <ApplicantProfile />
+      </Route>
     </>
   );
 }

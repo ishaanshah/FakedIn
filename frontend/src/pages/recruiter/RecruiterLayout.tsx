@@ -1,5 +1,6 @@
 import { Route } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import RecruiterProfile from "./RecruiterProfile";
 
 function RecruiterLayout() {
   return (
@@ -19,6 +20,9 @@ function RecruiterLayout() {
       />
 
       <Route path="/recruiter" exact></Route>
+      <Route path="/recruiter/profile" exact>
+        <RecruiterProfile />
+      </Route>
     </>
   );
 }
