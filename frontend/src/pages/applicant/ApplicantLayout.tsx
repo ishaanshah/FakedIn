@@ -1,31 +1,22 @@
-import Nav from "react-bootstrap/Nav";
-import Navbar from "react-bootstrap/Navbar";
-import { Link, Route } from "react-router-dom";
-import UserProfileDropdown from "../../components/UserProfileDropdown";
+import { Route } from "react-router-dom";
+import Navbar from "../../components/Navbar";
 
 function ApplicantLayout() {
-  const name = "Ishaan Shah";
-
   return (
     <>
-      <Navbar bg="light" variant="light">
-        <Navbar.Brand>
-          <b>FakedIn</b>
-        </Navbar.Brand>
-        <Nav className="mr-auto" activeKey={window.location.pathname}>
-          <Nav.Link eventKey="/applicant" as={Link} to="/applicant">
-            Home
-          </Nav.Link>
-          <Nav.Link
-            eventKey="/applicant/my_applications"
-            as={Link}
-            to="/applicant/my_applications"
-          >
-            My Applications
-          </Nav.Link>
-        </Nav>
-        <UserProfileDropdown variant="applicant" />
-      </Navbar>
+      <Navbar
+        variant="applicant"
+        entries={[
+          {
+            path: "/applicant",
+            display: "Home",
+          },
+          {
+            path: "/applicant/my_applications",
+            display: "My Applications",
+          },
+        ]}
+      />
 
       <Route path="/applicant" exact></Route>
     </>

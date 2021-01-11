@@ -1,29 +1,22 @@
-import Nav from "react-bootstrap/Nav";
-import Navbar from "react-bootstrap/Navbar";
-import { Link, Route } from "react-router-dom";
-import UserProfileDropdown from "../../components/UserProfileDropdown";
+import { Route } from "react-router-dom";
+import Navbar from "../../components/Navbar";
 
 function RecruiterLayout() {
   return (
     <>
-      <Navbar bg="light" variant="light">
-        <Navbar.Brand>
-          <b>FakedIn</b>
-        </Navbar.Brand>
-        <Nav className="mr-auto" activeKey={window.location.pathname}>
-          <Nav.Link eventKey="/recruiter" as={Link} to="/recruiter">
-            Home
-          </Nav.Link>
-          <Nav.Link
-            eventKey="/recruiter/accepted"
-            as={Link}
-            to="/recruiter/accepted"
-          >
-            Accepted
-          </Nav.Link>
-        </Nav>
-      </Navbar>
-      <UserProfileDropdown variant="recruiter" />
+      <Navbar
+        variant="recruiter"
+        entries={[
+          {
+            path: "/recruiter",
+            display: "Home",
+          },
+          {
+            path: "/recruiter/accepted",
+            display: "Accepted",
+          },
+        ]}
+      />
 
       <Route path="/recruiter" exact></Route>
     </>
