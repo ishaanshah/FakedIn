@@ -13,7 +13,7 @@ type CustomNavbarProps = {
 };
 
 function CustomNavbar({ variant, entries }: CustomNavbarProps) {
-  const name = "Ishaan Shah";
+  const name = "John Doe";
 
   return (
     <Navbar bg="light" variant="light">
