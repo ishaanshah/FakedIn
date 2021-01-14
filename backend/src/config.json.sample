@@ -1,5 +1,6 @@
 const config = {
     DB_URL: "mongodb+srv://<username>:<password>@fakedin.ytcju.mongodb.net/FakedIn?retryWrites=true&w=majority"
+    JWT_SECRET: "just an assignment who cares."
 }
 
 export default config;

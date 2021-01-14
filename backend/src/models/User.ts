@@ -17,7 +17,7 @@ import * as bcrypt from "bcrypt";
 })
 export class User {
   @prop({ required: true })
-  public userType!: "recruiter" | "applicant";
+  public userType!: "recruiter" | "applicant" | "unknown";
 
   @prop({ required: true })
   public name!: string;
@@ -45,5 +45,7 @@ export class User {
   }
 }
 
-const UserModel = getModelForClass(User);
+const UserModel = getModelForClass(User, {
+  schemaOptions: { collection: "users" },
+});
 export default UserModel;
