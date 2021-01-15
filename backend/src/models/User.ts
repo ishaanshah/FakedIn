@@ -4,8 +4,10 @@ import {
   prop,
   index,
   getModelForClass,
+  Ref,
 } from "@typegoose/typegoose";
-import * as bcrypt from "bcrypt";
+import { Job } from "./Job";
+import bcrypt from "bcrypt";
 
 class Education {
   @prop({ required: true })
@@ -18,7 +20,10 @@ class Education {
     validate: {
       validator: function (endYear: number) {
         const entry = this as any;
-        return !!(entry.startYear && endYear >= entry.startYear);
+        if (entry.startYear) {
+          return !!(endYear >= entry.startYear);
+        }
+        return true;
       },
       message: "End year should be smaller than start year.",
     },
@@ -69,7 +74,7 @@ export class User {
       validator: function (value: Array<string>) {
         return value.length > 0;
       },
-      message: "You should have atleast one skill.",
+      message: "Mention atleast one skill.",
     },
     type: () => [String],
   })
@@ -92,8 +97,22 @@ export class User {
   })
   public contact?: string;
 
+  @prop({ required: true, ref: "Job" })
+  public appliedJobs!: Array<Ref<Job>>;
+
+  @prop({ ref: "Job", foreignField: "postedBy", localField: "_id" })
+  public jobsPosted!: Array<Ref<Job>>;
+
   public async isPasswordValid(this: DocumentType<User>, password: string) {
     return await bcrypt.compare(password, this.password);
+  }
+
+  public getJobsPosted(this: DocumentType<User>) {
+    return this.populate("jobsPosted");
+  }
+
+  public getAppliedJobs(this: DocumentType<User>) {
+    return this.populate("appliedJobs");
   }
 }
 
