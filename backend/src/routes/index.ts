@@ -1,6 +1,6 @@
 import { Router } from "express";
 import AuthRouter from "./Auth";
-import UserRouter from "./Users";
+import UserRouter from "./User";
 import passport from "passport";
 
 // Init router and path

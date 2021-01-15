@@ -7,6 +7,25 @@ import {
 } from "@typegoose/typegoose";
 import * as bcrypt from "bcrypt";
 
+class Education {
+  @prop({ required: true })
+  public institutionName!: string;
+
+  @prop({ required: true })
+  public startYear!: number;
+
+  @prop({
+    validate: {
+      validator: function (endYear: number) {
+        const entry = this as any;
+        return !!(entry.startYear && endYear >= entry.startYear);
+      },
+      message: "End year should be smaller than start year.",
+    },
+  })
+  public endYear?: number;
+}
+
 @index({ email: 1 }, { unique: true })
 @pre<User>("save", async function (next) {
   // Hash the password
@@ -25,20 +44,53 @@ export class User {
   @prop({ required: true })
   public email!: string;
 
-  @prop({ required: true })
+  @prop({ required: true, minlength: 8 })
   public password!: string;
 
-  @prop()
-  public profilePhoto?: string;
+  @prop({
+    required: function () {
+      return (this as any).userType === "applicant";
+    },
+    validate: {
+      validator: function (value: Array<Education>) {
+        return value.length > 0;
+      },
+      message: "You should have atleast one education entry.",
+    },
+    type: () => [Education],
+  })
+  public education?: Array<Education>;
 
-  @prop()
+  @prop({
+    required: function () {
+      return (this as any).userType === "applicant";
+    },
+    validate: {
+      validator: function (value: Array<string>) {
+        return value.length > 0;
+      },
+      message: "You should have atleast one skill.",
+    },
+    type: () => [String],
+  })
   public skills?: Array<string>;
 
-  @prop()
   public resume?: string;
 
-  @prop()
+  @prop({
+    required: function () {
+      return (this as any).userType === "recruiter";
+    },
+  })
   public bio?: string;
+
+  @prop({
+    required: function () {
+      return (this as any).userType === "recruiter";
+    },
+    minlength: 10,
+  })
+  public contact?: string;
 
   public async isPasswordValid(this: DocumentType<User>, password: string) {
     return await bcrypt.compare(password, this.password);
