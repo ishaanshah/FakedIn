@@ -16,6 +16,7 @@ const app = express();
 import { mongoose } from "@typegoose/typegoose";
 
 import * as config from "./config.json";
+import APIError from "./shared/Error";
 
 /************************************************************************************
  *                              Set basic express settings
@@ -44,10 +45,9 @@ if (process.env.NODE_ENV === "production") {
 app.use("/api", BaseRouter);
 
 // Print API errors
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: APIError, req: Request, res: Response, next: NextFunction) => {
   logger.err(err, true);
-  return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+  return res.status(err.status || StatusCodes.INTERNAL_SERVER_ERROR).json({
     message: err.message,
   });
 });

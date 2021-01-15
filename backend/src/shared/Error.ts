@@ -1,5 +1,5 @@
 export default class APIError extends Error {
-  public statusCode?: number;
+  public status?: number;
 
   constructor(message: string) {
     super(message);
