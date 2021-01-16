@@ -1,6 +1,8 @@
 import { Router } from "express";
 import AuthRouter from "./Auth";
 import UserRouter from "./User";
+import JobsRouter from "./Job";
+import { completedRegistration } from "src/shared/functions";
 import passport from "passport";
 
 // Init router and path
@@ -12,6 +14,12 @@ router.use(
   "/user",
   passport.authenticate("jwt", { session: false, failWithError: true }),
   UserRouter
+);
+router.use(
+  "/jobs",
+  passport.authenticate("jwt", { session: false, failWithError: true }),
+  completedRegistration("any"),
+  JobsRouter
 );
 
 // Export the base-router
