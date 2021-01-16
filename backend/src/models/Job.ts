@@ -16,16 +16,29 @@ export class Job {
   @prop({ required: true, ref: "User" })
   public applicants!: Array<Ref<User>>;
 
-  @prop({ required: true })
+  @prop({ required: true, min: 0 })
   public maxApplicants!: number;
 
-  @prop({ required: true })
+  @prop({ required: true, min: 0 })
   public positions!: number;
 
   @prop({ required: true })
   public postedOn!: Date;
 
-  @prop({ required: true })
+  @prop({
+    required: true,
+    validate: {
+      validator: function (value: Date) {
+        const postedOn = (this as any).postedOn;
+        if (postedOn) {
+          return value >= postedOn;
+        } else {
+          return value >= new Date();
+        }
+      },
+      message: "Deadline should be a date in the future",
+    },
+  })
   public deadline!: Date;
 
   @prop({
@@ -43,10 +56,10 @@ export class Job {
   @prop({ required: true })
   public jobType!: "full" | "part" | "home";
 
-  @prop({ required: true, max: 7 })
+  @prop({ required: true, max: 7, min: 0 })
   public duration!: number;
 
-  @prop({ required: true })
+  @prop({ required: true, min: 0 })
   public salary!: number;
 
   @prop({ required: true, min: 0, max: 5 })

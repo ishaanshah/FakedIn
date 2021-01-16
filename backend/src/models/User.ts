@@ -13,7 +13,7 @@ class Education {
   @prop({ required: true })
   public institutionName!: string;
 
-  @prop({ required: true })
+  @prop({ required: true, min: 0 })
   public startYear!: number;
 
   @prop({
@@ -27,6 +27,7 @@ class Education {
       },
       message: "End year should be smaller than start year.",
     },
+    min: 0,
   })
   public endYear?: number;
 }
@@ -58,7 +59,10 @@ export class User {
     },
     validate: {
       validator: function (value: Array<Education>) {
-        return value.length > 0;
+        if ((this as any).userType === "applicant") {
+          return value.length > 0;
+        }
+        return true;
       },
       message: "You should have atleast one education entry.",
     },
@@ -72,7 +76,10 @@ export class User {
     },
     validate: {
       validator: function (value: Array<string>) {
-        return value.length > 0;
+        if ((this as any).userType === "applicant") {
+          return value.length > 0;
+        }
+        return true;
       },
       message: "Mention atleast one skill.",
     },
@@ -97,11 +104,11 @@ export class User {
   })
   public contact?: string;
 
-  @prop({ required: true, ref: "Job" })
-  public appliedJobs!: Array<Ref<Job>>;
+  @prop({ ref: "Job" })
+  public appliedJobs?: Array<Ref<Job>>;
 
   @prop({ ref: "Job", foreignField: "postedBy", localField: "_id" })
-  public jobsPosted!: Array<Ref<Job>>;
+  public jobsPosted?: Array<Ref<Job>>;
 
   public async isPasswordValid(this: DocumentType<User>, password: string) {
     return await bcrypt.compare(password, this.password);
