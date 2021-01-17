@@ -5,6 +5,7 @@ import App from "./App";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 import "react-bootstrap-typeahead/css/Typeahead.css";
+import "react-notifications-component/dist/theme.css";
 
 ReactDOM.render(
   <React.StrictMode>

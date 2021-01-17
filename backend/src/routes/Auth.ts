@@ -1,5 +1,6 @@
 import { DocumentType } from "@typegoose/typegoose";
 import { Router } from "express";
+import { StatusCodes } from "http-status-codes";
 import * as jwt from "jsonwebtoken";
 import passport from "passport";
 import * as config from "../config.json";
@@ -10,9 +11,9 @@ const router = Router();
 router.post(
   "/signup",
   passport.authenticate("signup", { failWithError: true, session: false }),
-  function (req, res, next) {
+  function (req, res) {
     res
-      .status(200)
+      .status(StatusCodes.OK)
       .json({ message: "Signed up succesfully. Login to continue." });
   }
 );
@@ -32,11 +33,11 @@ router.post(
       email: user.email,
     };
     const token = {
-      token: `Bearer ${jwt.sign(payload, config.JWT_SECRET)}`,
+      token: jwt.sign(payload, config.JWT_SECRET),
       message: "Logged in succesfully",
     };
 
-    res.status(200).json(token);
+    res.status(StatusCodes.OK).json(token);
   }
 );
 

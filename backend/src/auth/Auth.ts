@@ -25,7 +25,7 @@ passport.use(
           // Check if user with given E-Mail exists
           let user = await UserModel.findOne({ email });
           if (user) {
-            const message = "User with the given E-Mail already exists.";
+            const message = "User with the given E-Mail already exists";
             const error = new APIError(message);
             error.status = StatusCodes.CONFLICT;
             return done(error);
@@ -39,7 +39,7 @@ passport.use(
             name: req.body.name,
           });
           return done(null, user, {
-            message: "Signed up succesfully. Login to continue.",
+            message: "Signed up succesfully. Login to continue",
           });
         } catch (err) {
           return done(err);
@@ -58,10 +58,10 @@ passport.use(
         try {
           const user = await UserModel.findOne({ email });
 
-          const message = "Invalid credentials.";
+          const message = "Invalid Email or Password";
           if (!user) {
             const error = new APIError(message);
-            error.status = StatusCodes.NOT_FOUND;
+            error.status = StatusCodes.UNAUTHORIZED;
             return done(error, false);
           }
 
