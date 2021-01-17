@@ -34,6 +34,10 @@ class Education {
 
 @index({ email: 1 }, { unique: true })
 @pre<User>("save", async function (next) {
+  // Don't rehash the password if it's not updated
+  if (!this.isModified("password")) {
+    return next();
+  }
   // Hash the password
   const hash = await bcrypt.hash(this.password, 10);
   this.password = hash;

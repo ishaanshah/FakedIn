@@ -1,5 +1,6 @@
 import {
   DocumentType,
+  isDocument,
   prop,
   getModelForClass,
   Ref,
@@ -65,8 +66,16 @@ export class Job {
   @prop({ required: true, min: 0, max: 5 })
   public rating!: number;
 
-  public getPosterDetails(this: DocumentType<Job>) {
-    return this.populate("postedBy");
+  public async getPosterDetails(this: DocumentType<Job>) {
+    await this.populate("postedBy").execPopulate();
+
+    if (isDocument(this.postedBy)) {
+      return {
+        email: this.postedBy.email,
+        contact: this.postedBy.contact,
+        name: this.postedBy.name,
+      };
+    }
   }
 
   public getApplicants(this: DocumentType<Job>) {

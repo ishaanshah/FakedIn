@@ -2,6 +2,7 @@ import StatusCodes from "http-status-codes";
 import { Router } from "express";
 import JobModel, { Job } from "src/models/Job";
 import includes from "lodash/includes";
+import UserModel from "src/models/User";
 
 const router = Router();
 
@@ -58,6 +59,39 @@ router.get("/", function (req, res, next) {
           };
         })
       );
+    } catch (error) {
+      next(error);
+    }
+  })();
+});
+
+router.get("/get_job_info/:jobId", function (req, res, next) {
+  (async function () {
+    const jobId = req.params.jobId;
+
+    try {
+      const job = await JobModel.findById(jobId);
+
+      if (!job) {
+        res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "No job with given jobId found." });
+
+        return;
+      }
+
+      res.status(StatusCodes.OK).json({
+        jobId: job._id,
+        title: job.title,
+        postedBy: await job.getPosterDetails(),
+        maxApplicants: job.maxApplicants,
+        positions: job.positions,
+        deadline: job.deadline,
+        jobType: job.jobType,
+        duration: job.duration,
+        salary: job.salary,
+        rating: job.rating,
+      });
     } catch (error) {
       next(error);
     }
