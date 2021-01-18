@@ -28,6 +28,9 @@ function ApplicantProfile() {
                   ],
                   skills: [],
                 }}
+                setLoading={(loading) => {
+                  console.log(loading);
+                }}
               />
             </Card.Body>
           </Card>

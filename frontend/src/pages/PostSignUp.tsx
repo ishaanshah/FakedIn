@@ -31,8 +31,8 @@ function PostSignUp() {
 
   return (
     <Container>
-      <Row className="mt-5">
-        <Col>
+      <Row>
+        <Col className="mt-5">
           <div style={{ fontSize: "3em" }}>
             Hi <b>{user.name}</b>!
           </div>
@@ -42,8 +42,8 @@ function PostSignUp() {
           </div>
         </Col>
       </Row>
-      <Row className="mt-3">
-        <Col>
+      <Row>
+        <Col className="mt-3">
           <Card className="justify-content-center">
             {loading && (
               <Spinner
@@ -75,6 +75,7 @@ function PostSignUp() {
               {userRole === "applicant" && (
                 <Card.Body>
                   <ApplicantProfileForm
+                    setLoading={setLoading}
                     initialValues={{
                       name: user.name || "",
                       education: [

@@ -1,4 +1,6 @@
 // TODO: Applicant form validation
+import axios from "axios";
+import { store } from "react-notifications-component";
 import { Field, FieldArray, FormikProvider, useFormik } from "formik";
 import { Plus, X } from "react-bootstrap-icons";
 import { Typeahead } from "react-bootstrap-typeahead";
@@ -8,6 +10,10 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import * as Yup from "yup";
 import "yup-phone";
+import UserContext from "../../contexts/UserContext";
+import { useContext } from "react";
+import { getUserData } from "../../APIService";
+import { pickBy, identity } from "lodash";
 
 // List of available skills
 const Skills = [
@@ -63,15 +69,75 @@ type ApplicantProfileFormProps = {
       endYear?: number | string;
     }>;
     skills: Array<string>;
-    resume?: File;
+    //TODO: resume?: File;
   };
+  setLoading: (loading: boolean) => void;
 };
 
-function ApplicantProfileForm({ initialValues }: ApplicantProfileFormProps) {
+function ApplicantProfileForm({
+  initialValues,
+  setLoading,
+}: ApplicantProfileFormProps) {
+  const { setUser } = useContext(UserContext);
+
   const formik = useFormik({
     initialValues,
-    onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
+    onSubmit: async (values) => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("token");
+        const response = await axios.post(
+          "/api/user/update_user_info",
+          {
+            userType: "applicant",
+            name: values.name,
+            skills: values.skills,
+            education: values.education.map((entry) => {
+              if (entry.endYear === "") {
+                return {
+                  institutionName: entry.institutionName,
+                  startYear: entry.startYear,
+                };
+              } else {
+                return entry;
+              }
+            }),
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        store.addNotification({
+          container: "bottom-right",
+          type: "success",
+          message: response.data.message,
+          dismiss: {
+            duration: 3000,
+            showIcon: true,
+          },
+        });
+
+        const user = (await getUserData()) || {};
+        setUser(user as User);
+      } catch (error) {
+        store.addNotification({
+          container: "bottom-right",
+          type: "danger",
+          message:
+            error?.response?.data?.message ||
+            error.message ||
+            error?.response?.statusText,
+          dismiss: {
+            duration: 3000,
+            showIcon: true,
+          },
+        });
+      } finally {
+        setLoading(false);
+      }
     },
     enableReinitialize: true,
   });
@@ -174,22 +240,24 @@ function ApplicantProfileForm({ initialValues }: ApplicantProfileFormProps) {
             multiple
           />
         </Form.Group>
-        <Card.Title>Resume</Card.Title>
-        <Form.Group controlId="resume">
-          <Form.File
-            label={
-              formik.values.resume
+        {/* TODO:
+          <Card.Title>Resume</Card.Title>
+          <Form.Group controlId="resume">
+            <Form.File
+              label={
+                formik.values.resume
                 ? formik.values.resume.name
                 : "Upload your resume"
-            }
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              if (event.currentTarget.files?.length) {
-                formik.setFieldValue("resume", event.currentTarget.files[0]);
               }
-            }}
-            custom
-          />
-        </Form.Group>
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                if (event.currentTarget.files?.length) {
+                  formik.setFieldValue("resume", event.currentTarget.files[0]);
+                }
+              }}
+              custom
+            />
+          </Form.Group>
+          */}
         <Button variant="dark" type="submit">
           Continue
         </Button>
