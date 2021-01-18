@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useFormik } from "formik";
 import StatusCodes from "http-status-codes";
-import isEmpty from "lodash/isEmpty";
+import { isEmpty } from "lodash";
 import { useContext, useEffect, useState } from "react";
 import { Facebook, Google, Twitter } from "react-bootstrap-icons";
 import Button from "react-bootstrap/Button";
@@ -32,28 +32,18 @@ const SignupSchema = Yup.object().shape({
 function Landing() {
   // State denoting selected tab on landing page
   const [tab, setTab] = useState("login");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const history = useHistory();
   const { user, setUser } = useContext(UserContext);
 
   useEffect(() => {
-    const getCurrUser = async () => {
-      const userData = (await getUserData()) || {};
-      setUser(userData as User);
-      setLoading(false);
-    };
-
-    getCurrUser();
-  }, [setUser]);
-
-  useEffect(() => {
     if (!isEmpty(user)) {
       if (user.userType === "unknown") {
-        history.push("/choose");
+        history.replace("/choose");
       } else if (user.userType === "applicant") {
-        history.push("/applicant");
-      } else {
-        history.push("/recruiter");
+        history.replace("/applicant");
+      } else if (user.userType === "recruiter") {
+        history.replace("/recruiter");
       }
     }
   }, [user, history]);
@@ -83,7 +73,7 @@ function Landing() {
           },
         });
 
-        const userData = (await getUserData()) || {};
+        const userData = await getUserData();
         setUser(userData as User);
       } catch (error) {
         if (error.response) {

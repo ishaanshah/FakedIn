@@ -4,12 +4,21 @@ import PostSignUp from "./pages/PostSignUp";
 import ApplicantLayout from "./pages/applicant/ApplicantLayout";
 import RecruiterLayout from "./pages/recruiter/RecruiterLayout";
 import ReactNotification from "react-notifications-component";
-import { useState, useEffect } from "react";
-import { getUserData } from "./APIService";
+import { useEffect, useState } from "react";
 import UserContext from "./contexts/UserContext";
+import { getUserData } from "./APIService";
 
 function App() {
   const [user, setUser] = useState<User>({} as User);
+
+  useEffect(() => {
+    const getCurrUser = async () => {
+      const userData = (await getUserData(false)) || {};
+      setUser(userData as User);
+    };
+
+    getCurrUser();
+  }, []);
 
   return (
     <UserContext.Provider value={{ user, setUser }}>

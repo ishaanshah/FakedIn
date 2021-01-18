@@ -73,6 +73,7 @@ function ApplicantProfileForm({ initialValues }: ApplicantProfileFormProps) {
     onSubmit: (values) => {
       alert(JSON.stringify(values, null, 2));
     },
+    enableReinitialize: true,
   });
 
   return (

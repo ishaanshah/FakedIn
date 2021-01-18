@@ -26,6 +26,7 @@ function RecruiterProfileForm({ initialValues }: RecruiterProfileFormProps) {
     onSubmit: (values) => {
       alert(JSON.stringify(values, null, 2));
     },
+    enableReinitialize: true,
   });
 
   return (
