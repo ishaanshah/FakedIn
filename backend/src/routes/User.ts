@@ -1,9 +1,7 @@
-import StatusCodes from "http-status-codes";
-import { Router } from "express";
-import { User } from "src/models/User";
 import { DocumentType } from "@typegoose/typegoose";
-import { completedRegistration } from "src/shared/functions";
-import JobModel from "src/models/Job";
+import { Router } from "express";
+import StatusCodes from "http-status-codes";
+import { User } from "src/models/User";
 import APIError from "src/shared/Error";
 
 const router = Router();
@@ -65,36 +63,5 @@ router.post("/update_user_info", function (req, res, next) {
     }
   })();
 });
-
-const recruiterRouter = Router();
-recruiterRouter.post("/post_job", function (req, res, next) {
-  (async function () {
-    const user = req.user as DocumentType<User>;
-    const body = req.body;
-
-    try {
-      await JobModel.create({
-        title: body.title,
-        postedBy: user._id,
-        applicants: [],
-        maxApplicants: body.maxApplicants,
-        positions: body.positions,
-        postedOn: Date.now(),
-        deadline: new Date(body.deadline),
-        skillsRequired: body.skillsRequired,
-        jobType: body.jobType,
-        duration: body.duration,
-        salary: body.salary,
-        rating: body.rating,
-      });
-
-      res.status(StatusCodes.OK).json({ message: "Job created succesfully" });
-    } catch (error) {
-      next(error);
-    }
-  })();
-});
-
-router.use("/recruiter", completedRegistration("recruiter"), recruiterRouter);
 
 export default router;

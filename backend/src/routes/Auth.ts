@@ -1,9 +1,9 @@
 import { DocumentType } from "@typegoose/typegoose";
 import { Router } from "express";
 import { StatusCodes } from "http-status-codes";
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import passport from "passport";
-import * as config from "../config.json";
+import config from "../config.json";
 import { User } from "../models/User";
 
 const router = Router();

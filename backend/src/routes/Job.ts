@@ -1,12 +1,14 @@
-import StatusCodes from "http-status-codes";
+import { DocumentType } from "@typegoose/typegoose";
 import { Router } from "express";
-import JobModel, { Job } from "src/models/Job";
+import StatusCodes from "http-status-codes";
 import includes from "lodash/includes";
-import UserModel from "src/models/User";
+import JobModel, { Job } from "src/models/Job";
+import { User } from "src/models/User";
+import { completedRegistration } from "src/shared/functions";
 
 const router = Router();
 
-router.get("/", function (req, res, next) {
+router.get("/", completedRegistration("any"), function (req, res, next) {
   (async function () {
     let {
       offset = 0,
@@ -71,39 +73,75 @@ router.get("/", function (req, res, next) {
   })();
 });
 
-router.get("/get_job_info/:jobId", function (req, res, next) {
-  (async function () {
-    const jobId = req.params.jobId;
+router.get(
+  "/get_job_info/:jobId",
+  completedRegistration("any"),
+  function (req, res, next) {
+    (async function () {
+      const jobId = req.params.jobId;
 
-    try {
-      const job = await JobModel.findById(jobId);
+      try {
+        const job = await JobModel.findById(jobId);
 
-      if (!job) {
-        res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "No job with given jobId found." });
+        if (!job) {
+          res
+            .status(StatusCodes.NOT_FOUND)
+            .json({ message: "No job with given jobId found." });
 
-        return;
+          return;
+        }
+
+        res.status(StatusCodes.OK).json({
+          jobId: job._id,
+          title: job.title,
+          postedBy: await job.getPosterDetails(),
+          postedOn: job.postedOn,
+          skillsRequired: job.skillsRequired,
+          maxApplicants: job.maxApplicants,
+          positions: job.positions,
+          deadline: job.deadline,
+          jobType: job.jobType,
+          duration: job.duration,
+          salary: job.salary,
+          rating: job.rating,
+        });
+      } catch (error) {
+        next(error);
       }
+    })();
+  }
+);
 
-      res.status(StatusCodes.OK).json({
-        jobId: job._id,
-        title: job.title,
-        postedBy: await job.getPosterDetails(),
-        postedOn: job.postedOn,
-        skillsRequired: job.skillsRequired,
-        maxApplicants: job.maxApplicants,
-        positions: job.positions,
-        deadline: job.deadline,
-        jobType: job.jobType,
-        duration: job.duration,
-        salary: job.salary,
-        rating: job.rating,
-      });
-    } catch (error) {
-      next(error);
-    }
-  })();
-});
+router.post(
+  "/post_job",
+  completedRegistration("recruiter"),
+  function (req, res, next) {
+    (async function () {
+      const user = req.user as DocumentType<User>;
+      const body = req.body;
+
+      try {
+        await JobModel.create({
+          title: body.title,
+          postedBy: user._id,
+          applicants: [],
+          maxApplicants: body.maxApplicants,
+          positions: body.positions,
+          postedOn: Date.now(),
+          deadline: new Date(body.deadline),
+          skillsRequired: body.skillsRequired,
+          jobType: body.jobType,
+          duration: body.duration,
+          salary: body.salary,
+          rating: body.rating,
+        });
+
+        res.status(StatusCodes.OK).json({ message: "Job created succesfully" });
+      } catch (error) {
+        next(error);
+      }
+    })();
+  }
+);
 
 export default router;
