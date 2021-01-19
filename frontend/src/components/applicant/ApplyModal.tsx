@@ -4,7 +4,7 @@ import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 
 type ApplyModalProps = {
-  jobId: number;
+  jobId: string;
   showModal: boolean;
   setShowModal: Function;
 };

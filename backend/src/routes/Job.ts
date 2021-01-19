@@ -10,12 +10,16 @@ router.get("/", function (req, res, next) {
   (async function () {
     let {
       offset = 0,
-      limit = 25,
+      limit = 10,
       minSalary = 1000,
       maxSalary = 10000,
       duration = 0,
     } = req.query;
-    const { sortBy = "salary", order = "desc", jobType = "any" } = req.query;
+    const {
+      sortBy = "salary",
+      sortOrder = "desc",
+      jobType = "any",
+    } = req.query;
 
     try {
       offset = Number(offset);
@@ -31,13 +35,15 @@ router.get("/", function (req, res, next) {
         isNaN(maxSalary) ||
         isNaN(duration) ||
         !includes(["salary", "duration", "rating"], sortBy) ||
-        !includes(["asc", "desc"], order)
+        !includes(["asc", "desc"], sortOrder) ||
+        !includes(["any", "home", "part", "full"], jobType)
       ) {
         res.status(StatusCodes.BAD_REQUEST).json({ message: "Bad request" });
       }
 
       const findFilter: any = {
         salary: { $gte: minSalary, $lte: maxSalary },
+        deadline: { $gte: new Date() },
       };
       if (jobType !== "any") {
         findFilter.jobType = jobType as Job["jobType"];
@@ -48,7 +54,7 @@ router.get("/", function (req, res, next) {
 
       const jobs = await JobModel.find(findFilter)
         .select("_id")
-        .sort({ [sortBy as string]: order })
+        .sort({ [sortBy as string]: sortOrder })
         .skip(offset)
         .limit(limit);
 
@@ -84,6 +90,8 @@ router.get("/get_job_info/:jobId", function (req, res, next) {
         jobId: job._id,
         title: job.title,
         postedBy: await job.getPosterDetails(),
+        postedOn: job.postedOn,
+        skillsRequired: job.skillsRequired,
         maxApplicants: job.maxApplicants,
         positions: job.positions,
         deadline: job.deadline,

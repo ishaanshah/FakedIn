@@ -1,5 +1,7 @@
+import axios from "axios";
 import { useFormik } from "formik";
 import range from "lodash/range";
+import { useEffect, useState, useCallback } from "react";
 import { Search, SortDown, SortUp } from "react-bootstrap-icons";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
@@ -8,23 +10,73 @@ import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import Row from "react-bootstrap/Row";
+import { store } from "react-notifications-component";
 import JobInfoCard from "../../components/applicant/JobInfoCard";
+import Spinner from "react-bootstrap/Spinner";
+
+const MAX_ITEMS_PER_PAGE = 10;
 
 function ApplicantHome() {
+  const [jobList, setJobList] = useState<Array<{ jobId: string }>>([]);
+  const [page, setPage] = useState<number>(1);
+  const [loading, setLoading] = useState(true);
+
   const formik = useFormik({
     initialValues: {
       searchQuery: "",
-      sortBy: "Salary",
+      sortBy: "salary",
       sortOrder: "desc",
       jobType: "any",
-      jobDuration: 0,
+      duration: 0,
       minSalary: 1000,
-      maxSalary: 10000,
+      maxSalary: 50000,
     },
     onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
+      getJobs(values);
     },
   });
+
+  const getJobs = useCallback(
+    async (values) => {
+      setLoading(true);
+      try {
+        const response = await axios.get("/api/jobs", {
+          params: {
+            ...values,
+            count: MAX_ITEMS_PER_PAGE,
+            offset: (page - 1) * MAX_ITEMS_PER_PAGE,
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        setJobList(response.data);
+      } catch (error) {
+        store.addNotification({
+          container: "bottom-right",
+          type: "danger",
+          message:
+            error?.response?.data?.message ||
+            error.message ||
+            error?.response?.statusText,
+          dismiss: {
+            duration: 3000,
+            showIcon: true,
+          },
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [page]
+  );
+
+  useEffect(() => {
+    getJobs(formik.values);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getJobs, page]);
+
   return (
     <Container className="mt-3 mb-2">
       <Row className="mb-2">
@@ -47,9 +99,9 @@ function ApplicantHome() {
                     as="select"
                     custom
                   >
-                    <option>Salary</option>
-                    <option>Duration</option>
-                    <option>Rating</option>
+                    <option value="salary">Salary</option>
+                    <option value="duration">Duration</option>
+                    <option value="rating">Rating</option>
                   </Form.Control>
                   <InputGroup.Append>
                     <Button
@@ -80,10 +132,10 @@ function ApplicantHome() {
                   custom
                   className="mt-2"
                 >
-                  <option value="">Any</option>
-                  <option>Part Time</option>
-                  <option>Full Time</option>
-                  <option>Work from Home</option>
+                  <option value="any">Any</option>
+                  <option value="part">Part Time</option>
+                  <option value="full">Full Time</option>
+                  <option value="home">Work from Home</option>
                 </Form.Control>
                 <Card.Subtitle className="mt-3 text-muted">
                   Salary (&#8377; / Month)
@@ -121,10 +173,10 @@ function ApplicantHome() {
                   Duration
                 </Card.Subtitle>
                 <Form.Control
-                  value={formik.values.jobDuration}
+                  value={formik.values.duration}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  name="jobDuration"
+                  name="duration"
                   as="select"
                   custom
                   className="mt-2"
@@ -168,19 +220,49 @@ function ApplicantHome() {
               </Col>
             </Form.Row>
           </Form>
-          {range(5).map((idx) => (
-            <Row className="mt-3" key={idx}>
+          {!loading &&
+            jobList.map((data) => (
+              <Row className="mt-3" key={data.jobId}>
+                <Col>
+                  <JobInfoCard jobId={data.jobId} />
+                </Col>
+              </Row>
+            ))}
+          {!loading && jobList.length === 0 && (
+            <Row className="text-center mt-3">
               <Col>
-                <JobInfoCard jobId={idx} />
+                <h4>
+                  Sorry we couldn't find any jobs that satisfy your search
+                  criteria.
+                </h4>
               </Col>
             </Row>
-          ))}
-          <Row className="mt-3">
+          )}
+          {loading && (
+            <Row className="text-center mt-3">
+              <Col>
+                <Spinner animation="border" />
+              </Col>
+            </Row>
+          )}
+          <Row className="mt-4">
             <Col>
-              <Button variant="dark">Previous</Button>
+              <Button
+                variant="dark"
+                onClick={() => setPage(page - 1)}
+                disabled={page <= 1}
+              >
+                Previous
+              </Button>
             </Col>
             <Col className="text-right">
-              <Button variant="dark">Next</Button>
+              <Button
+                variant="dark"
+                onClick={() => setPage(page + 1)}
+                disabled={jobList.length === 0}
+              >
+                Next
+              </Button>
             </Col>
           </Row>
         </Col>
