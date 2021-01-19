@@ -78,14 +78,14 @@ function PostSignUp() {
                     setLoading={setLoading}
                     initialValues={{
                       name: user.name || "",
-                      education: [
+                      education: user.education || [
                         {
                           institutionName: "",
                           startYear: "",
                           endYear: "",
                         },
                       ],
-                      skills: [],
+                      skills: user.skills || [],
                     }}
                   />
                 </Card.Body>

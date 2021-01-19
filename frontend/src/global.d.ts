@@ -3,7 +3,7 @@ declare type User = {
   name: string;
   email: string;
   education?: Array<{
-    insitutionName: string;
+    institutionName: string;
     startYear: number;
     endYear?: number;
   }>;
