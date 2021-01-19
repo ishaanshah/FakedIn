@@ -1,8 +1,10 @@
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-import { NavLink } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import { PersonCircle } from "react-bootstrap-icons";
+import { useContext } from "react";
+import UserContext from "../contexts/UserContext";
 
 type CustomNavbarProps = {
   variant: "applicant" | "recruiter";
@@ -13,7 +15,14 @@ type CustomNavbarProps = {
 };
 
 function CustomNavbar({ variant, entries }: CustomNavbarProps) {
-  const name = "John Doe";
+  const { user, setUser } = useContext(UserContext);
+  const history = useHistory();
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    setUser({} as User);
+    history.push("/");
+  };
 
   return (
     <Navbar bg="light" variant="light">
@@ -34,7 +43,7 @@ function CustomNavbar({ variant, entries }: CustomNavbarProps) {
           id="profile-dropdown"
           title={
             <>
-              Hello {name}!&nbsp;&nbsp;
+              Hello {user.name}!&nbsp;&nbsp;
               <PersonCircle size={30} />
             </>
           }
@@ -47,7 +56,7 @@ function CustomNavbar({ variant, entries }: CustomNavbarProps) {
           >
             My profile
           </NavDropdown.Item>
-          <NavDropdown.Item>Sign out</NavDropdown.Item>
+          <NavDropdown.Item onClick={logout}>Sign out</NavDropdown.Item>
         </NavDropdown>
       </Nav>
     </Navbar>
