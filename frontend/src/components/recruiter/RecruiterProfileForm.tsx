@@ -1,9 +1,12 @@
 import { useFormik } from "formik";
+import { useContext } from "react";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import Form from "react-bootstrap/Form";
 import * as Yup from "yup";
 import "yup-phone";
+import { getUserData, updateUserData } from "../../APIService";
+import UserContext from "../../contexts/UserContext";
 
 const RecruiterSchema = Yup.object().shape({
   name: Yup.string().required().label("Name"),
@@ -17,14 +20,24 @@ type RecruiterProfileFormProps = {
     contact: number | string;
     bio: string;
   };
+  setLoading: (loading: boolean) => void;
 };
 
-function RecruiterProfileForm({ initialValues }: RecruiterProfileFormProps) {
+function RecruiterProfileForm({
+  initialValues,
+  setLoading,
+}: RecruiterProfileFormProps) {
+  const { setUser } = useContext(UserContext);
+
   const formik = useFormik({
     initialValues,
     validationSchema: RecruiterSchema,
-    onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
+    onSubmit: async (values) => {
+      setLoading(true);
+      await updateUserData({ userType: "recruiter", ...values } as User);
+      const user = (await getUserData()) || {};
+      setUser(user as User);
+      setLoading(false);
     },
     enableReinitialize: true,
   });

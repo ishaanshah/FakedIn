@@ -1,7 +1,6 @@
 // TODO: Applicant form validation
-import axios from "axios";
-import { store } from "react-notifications-component";
 import { Field, FieldArray, FormikProvider, useFormik } from "formik";
+import { useContext } from "react";
 import { Plus, X } from "react-bootstrap-icons";
 import { Typeahead } from "react-bootstrap-typeahead";
 import Button from "react-bootstrap/Button";
@@ -10,10 +9,8 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import * as Yup from "yup";
 import "yup-phone";
+import { getUserData, updateUserData } from "../../APIService";
 import UserContext from "../../contexts/UserContext";
-import { useContext } from "react";
-import { getUserData } from "../../APIService";
-import { pickBy, identity } from "lodash";
 
 // List of available skills
 const Skills = [
@@ -83,61 +80,11 @@ function ApplicantProfileForm({
   const formik = useFormik({
     initialValues,
     onSubmit: async (values) => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem("token");
-        const response = await axios.post(
-          "/api/user/update_user_info",
-          {
-            userType: "applicant",
-            name: values.name,
-            skills: values.skills,
-            education: values.education.map((entry) => {
-              if (entry.endYear === "") {
-                return {
-                  institutionName: entry.institutionName,
-                  startYear: entry.startYear,
-                };
-              } else {
-                return entry;
-              }
-            }),
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        store.addNotification({
-          container: "bottom-right",
-          type: "success",
-          message: response.data.message,
-          dismiss: {
-            duration: 3000,
-            showIcon: true,
-          },
-        });
-
-        const user = (await getUserData()) || {};
-        setUser(user as User);
-      } catch (error) {
-        store.addNotification({
-          container: "bottom-right",
-          type: "danger",
-          message:
-            error?.response?.data?.message ||
-            error.message ||
-            error?.response?.statusText,
-          dismiss: {
-            duration: 3000,
-            showIcon: true,
-          },
-        });
-      } finally {
-        setLoading(false);
-      }
+      setLoading(true);
+      await updateUserData({ userType: "applicant", ...values } as User);
+      const user = (await getUserData()) || {};
+      setUser(user as User);
+      setLoading(false);
     },
     enableReinitialize: true,
   });

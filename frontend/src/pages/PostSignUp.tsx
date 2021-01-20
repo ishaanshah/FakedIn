@@ -1,3 +1,4 @@
+// TODO: Refactor user context into forms
 import { useState, useContext, useEffect } from "react";
 import UserContext from "../contexts/UserContext";
 import Card from "react-bootstrap/Card";
@@ -9,7 +10,7 @@ import ApplicantProfileForm from "../components/applicant/ApplicantProfileForm";
 import RecruiterProfileForm from "../components/recruiter/RecruiterProfileForm";
 import { useHistory } from "react-router-dom";
 import Spinner from "react-bootstrap/Spinner";
-import { isEmpty } from "lodash";
+import { isEmpty, set } from "lodash";
 
 function PostSignUp() {
   // State denoting type of the user i.e Recruiter or Applicant
@@ -95,9 +96,10 @@ function PostSignUp() {
                   <RecruiterProfileForm
                     initialValues={{
                       name: user.name || "",
-                      contact: "",
-                      bio: "",
+                      contact: user.contact || "",
+                      bio: user.bio || "",
                     }}
+                    setLoading={setLoading}
                   />
                 </Card.Body>
               )}
