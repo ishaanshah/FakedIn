@@ -3,6 +3,7 @@ import { Router } from "express";
 import StatusCodes from "http-status-codes";
 import { User } from "src/models/User";
 import APIError from "src/shared/Error";
+import { completedRegistration } from "src/shared/functions";
 
 const router = Router();
 
@@ -57,11 +58,38 @@ router.post("/update_user_info", function (req, res, next) {
       }
 
       await user.save({ validateBeforeSave: true });
-      res.status(200).json({ message: "Information saved succesfully." });
+      res
+        .status(StatusCodes.OK)
+        .json({ message: "Information saved succesfully." });
     } catch (error) {
       next(error);
     }
   })();
 });
+
+router.get(
+  "/get_jobs_posted",
+  completedRegistration("recruiter"),
+  function (req, res, next) {
+    (async function () {
+      const user = req.user as DocumentType<User>;
+
+      let { limit = 25, offset = 0 } = req.query;
+      try {
+        limit = Number(limit);
+        offset = Number(offset);
+        if (isNaN(limit) || isNaN(offset)) {
+          res.status(StatusCodes.BAD_REQUEST).json({ message: "Bad request" });
+          return;
+        }
+
+        const jobsPosted = await user.getJobsPosted(limit, offset);
+        res.status(StatusCodes.OK).json(jobsPosted);
+      } catch (error) {
+        next(error);
+      }
+    })();
+  }
+);
 
 export default router;

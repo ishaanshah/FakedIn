@@ -41,6 +41,7 @@ router.get("/", completedRegistration("any"), function (req, res, next) {
         !includes(["any", "home", "part", "full"], jobType)
       ) {
         res.status(StatusCodes.BAD_REQUEST).json({ message: "Bad request" });
+        return;
       }
 
       const findFilter: any = {

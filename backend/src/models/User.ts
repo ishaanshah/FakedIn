@@ -122,8 +122,17 @@ export class User {
     return await bcrypt.compare(password, this.password);
   }
 
-  public async getJobsPosted(this: DocumentType<User>) {
-    await this.populate("jobsPosted").execPopulate();
+  public async getJobsPosted(
+    this: DocumentType<User>,
+    limit: number,
+    offset: number
+  ) {
+    await this.populate({
+      path: "jobsPosted",
+      select: "title maxApplicants positions deadline",
+      match: { deadline: { $gte: new Date() } },
+      options: { limit, skip: offset, sort: { postedOn: "desc" } },
+    }).execPopulate();
     return this.jobsPosted;
   }
 
