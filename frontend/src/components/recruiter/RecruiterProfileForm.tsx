@@ -53,7 +53,6 @@ function RecruiterProfileForm({
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           isInvalid={formik.touched.name && !!formik.errors.name}
-          isValid={formik.touched.name && !formik.errors.name}
         />
         <Form.Control.Feedback type="invalid">
           {formik.errors.name}
@@ -68,7 +67,6 @@ function RecruiterProfileForm({
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           isInvalid={formik.touched.contact && !!formik.errors.contact}
-          isValid={formik.touched.contact && !formik.errors.contact}
         />
         <Form.Control.Feedback type="invalid">
           {formik.errors.contact}
@@ -85,7 +83,6 @@ function RecruiterProfileForm({
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           isInvalid={formik.touched.bio && !!formik.errors.bio}
-          isValid={formik.touched.bio && !formik.errors.bio}
         />
         <Form.Control.Feedback type="invalid">
           {formik.errors.bio}

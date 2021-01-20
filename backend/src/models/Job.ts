@@ -14,17 +14,14 @@ export class Job {
   @prop({ required: true, ref: "User" })
   public postedBy!: Ref<User>;
 
-  @prop({ required: true, ref: "User" })
-  public applicants!: Array<Ref<User>>;
-
-  @prop({ required: true, min: 0 })
+  @prop({ required: true, min: 1 })
   public maxApplicants!: number;
 
-  @prop({ required: true, min: 0 })
+  @prop({ required: true, min: 1 })
   public positions!: number;
 
-  @prop({ required: true })
-  public postedOn!: Date;
+  @prop({ required: true, default: () => new Date() })
+  public postedOn?: Date;
 
   @prop({
     required: true,
@@ -48,7 +45,7 @@ export class Job {
       validator: function (value: Array<string>) {
         return value.length > 0;
       },
-      message: "Mention atleast one required skill.",
+      message: "Mention atleast one skill.",
     },
     type: () => [String],
   })
@@ -63,8 +60,8 @@ export class Job {
   @prop({ required: true, min: 0 })
   public salary!: number;
 
-  @prop({ required: true, min: 0, max: 5 })
-  public rating!: number;
+  @prop({ required: true, min: 0, max: 5, default: 0 })
+  public rating?: number;
 
   public async getPosterDetails(this: DocumentType<Job>) {
     await this.populate("postedBy").execPopulate();
@@ -76,10 +73,6 @@ export class Job {
         name: this.postedBy.name,
       };
     }
-  }
-
-  public getApplicants(this: DocumentType<Job>) {
-    return this.populate("applicants");
   }
 }
 

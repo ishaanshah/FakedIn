@@ -124,16 +124,13 @@ router.post(
         await JobModel.create({
           title: body.title,
           postedBy: user._id,
-          applicants: [],
           maxApplicants: body.maxApplicants,
           positions: body.positions,
-          postedOn: Date.now(),
           deadline: new Date(body.deadline),
           skillsRequired: body.skillsRequired,
           jobType: body.jobType,
           duration: body.duration,
           salary: body.salary,
-          rating: body.rating,
         });
 
         res.status(StatusCodes.OK).json({ message: "Job created succesfully" });

@@ -8,6 +8,7 @@ import {
 } from "@typegoose/typegoose";
 import { Job } from "./Job";
 import bcrypt from "bcrypt";
+import { Application } from "./Application";
 
 class Education {
   @prop({ required: true })
@@ -108,8 +109,11 @@ export class User {
   })
   public contact?: string;
 
-  @prop({ ref: "Job" })
-  public appliedJobs?: Array<Ref<Job>>;
+  @prop({ required: true, default: 0, min: 0, max: 5 })
+  public rating?: number;
+
+  @prop({ ref: "Application", foreignField: "applicant", localField: "_id" })
+  public applications?: Array<Ref<Application>>;
 
   @prop({ ref: "Job", foreignField: "postedBy", localField: "_id" })
   public jobsPosted?: Array<Ref<Job>>;
@@ -118,12 +122,14 @@ export class User {
     return await bcrypt.compare(password, this.password);
   }
 
-  public getJobsPosted(this: DocumentType<User>) {
-    return this.populate("jobsPosted");
+  public async getJobsPosted(this: DocumentType<User>) {
+    await this.populate("jobsPosted").execPopulate();
+    return this.jobsPosted;
   }
 
-  public getAppliedJobs(this: DocumentType<User>) {
-    return this.populate("appliedJobs");
+  public async getAppliedJobs(this: DocumentType<User>) {
+    await this.populate("applications").execPopulate();
+    return this.applications;
   }
 }
 

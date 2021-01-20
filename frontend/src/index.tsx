@@ -6,6 +6,7 @@ import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import "react-notifications-component/dist/theme.css";
+import "react-datepicker/dist/react-datepicker.css";
 
 ReactDOM.render(
   <React.StrictMode>
