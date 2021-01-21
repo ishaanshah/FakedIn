@@ -1,51 +1,17 @@
 import axios from "axios";
+import { useEffect, useState } from "react";
+import { PencilFill, TrashFill } from "react-bootstrap-icons";
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import Spinner from "react-bootstrap/Spinner";
 import Table from "react-bootstrap/Table";
-import Button from "react-bootstrap/Button";
-import { useEffect, useState } from "react";
 import { store } from "react-notifications-component";
-import { TrashFill, PencilFill } from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
-import Modal from "react-bootstrap/Modal";
+import ConfirmDeleteModal from "../../components/recruiter/ConfirmDeleteModal";
 
 const MAX_ITEMS_PER_PAGE = 10;
-
-function ConfirmDeleteModal({
-  jobId,
-  showModal,
-  setShowModal,
-  refresh,
-  setRefresh,
-}: {
-  jobId: string;
-  showModal: boolean;
-  setShowModal: (show: boolean) => void;
-  refresh: number;
-  setRefresh: (value: number) => void;
-}) {
-  return (
-    <Modal
-      show={showModal}
-      onHide={() => setShowModal(false)}
-      contentClassName="justify-content-center"
-      size="sm"
-      centered
-    >
-      <Modal.Header>Confirm deletion</Modal.Header>
-      <Modal.Body>Are you sure you want to delete the job?</Modal.Body>
-      <Modal.Footer>
-        <Button variant="outline-dark" onClick={() => setShowModal(false)}>
-          Cancel
-        </Button>
-        <Button variant="outline-danger" type="submit">
-          Delete
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  );
-}
 
 function RecruiterHome() {
   const [jobList, setJobList] = useState<
@@ -108,81 +74,87 @@ function RecruiterHome() {
             <h1>Your active job listings</h1>
           </Col>
         </Row>
-        {!loading && jobList.length === 0 && (
-          <Row className="text-center mt-3">
+        {loading && (
+          <Row className="text-center">
             <Col>
-              <h4>
-                Sorry we couldn't find any jobs that satisfy your search
-                criteria.
-              </h4>
+              <Spinner animation="border" />
             </Col>
           </Row>
         )}
-        <Row>
-          <Col>
-            <Table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Job title</th>
-                  <th>Posted on</th>
-                  <th>Deadline</th>
-                  <th>No. of applications</th>
-                  <th>No. of positions</th>
-                  <th>View applications</th>
-                  <th />
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {jobList.map((entry, idx) => (
-                  <tr key={entry._id}>
-                    <td className="align-middle">{idx + 1}</td>
-                    <td className="align-middle">{entry.title}</td>
-                    <td className="align-middle">
-                      {new Date(entry.postedOn).toLocaleString("en-IN", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </td>
-                    <td className="align-middle">
-                      {new Date(entry.deadline).toLocaleString("en-IN", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </td>
-                    <td className="align-middle">{entry.applicationCount}</td>
-                    <td className="align-middle">{entry.positions}</td>
-                    <td className="align-middle">
-                      <Link to={`/recruiter/applications/${entry._id}`}>
-                        View applications
-                      </Link>
-                    </td>
-                    <td className="align-middle">
-                      <Button variant="outline-dark" size="sm">
-                        <PencilFill />
-                      </Button>
-                    </td>
-                    <td className="align-middle">
-                      <Button
-                        variant="outline-dark"
-                        size="sm"
-                        onClick={() => {
-                          setShowDeleteModal(true);
-                          setSelectedJob(entry._id);
-                        }}
-                      >
-                        <TrashFill />
-                      </Button>
-                    </td>
+        {!loading && jobList.length === 0 && (
+          <Row className="text-center mt-3">
+            <Col>
+              <h4>Hmm, seems like you don't have any active job listings.</h4>
+            </Col>
+          </Row>
+        )}
+        {!loading && jobList.length > 0 && (
+          <Row style={{ opacity: loading ? 0.5 : 1 }}>
+            <Col>
+              <Table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Job title</th>
+                    <th>Posted on</th>
+                    <th>Deadline</th>
+                    <th>No. of applications</th>
+                    <th>No. of positions</th>
+                    <th>View applications</th>
+                    <th />
+                    <th />
                   </tr>
-                ))}
-              </tbody>
-            </Table>
-          </Col>
-        </Row>
+                </thead>
+                <tbody>
+                  {jobList.map((entry, idx) => (
+                    <tr key={entry._id}>
+                      <td className="align-middle">{idx + 1}</td>
+                      <td className="align-middle">{entry.title}</td>
+                      <td className="align-middle">
+                        {new Date(entry.postedOn).toLocaleString("en-IN", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </td>
+                      <td className="align-middle">
+                        {new Date(entry.deadline).toLocaleString("en-IN", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </td>
+                      <td className="align-middle">{entry.applicationCount}</td>
+                      <td className="align-middle">{entry.positions}</td>
+                      <td className="align-middle">
+                        <Link to={`/recruiter/applications/${entry._id}`}>
+                          View applications
+                        </Link>
+                      </td>
+                      <td className="align-middle">
+                        <Button variant="outline-dark" size="sm">
+                          <PencilFill />
+                        </Button>
+                      </td>
+                      <td className="align-middle">
+                        <Button
+                          variant="outline-dark"
+                          size="sm"
+                          onClick={() => {
+                            setShowDeleteModal(true);
+                            setSelectedJob(entry._id);
+                          }}
+                        >
+                          <TrashFill />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </Col>
+          </Row>
+        )}
         <Row className="mt-4">
           <Col>
             <Button
@@ -213,7 +185,6 @@ function RecruiterHome() {
         refresh={refresh}
         setRefresh={setRefresh}
       />
-      ;
     </>
   );
 }
