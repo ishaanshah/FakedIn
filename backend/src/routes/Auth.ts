@@ -20,12 +20,11 @@ router.post(
 
 router.post(
   "/login",
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   passport.authenticate("login", {
     failWithError: true,
     session: false,
   }),
-  function (req, res, next) {
+  function (req, res) {
     const user = req.user as DocumentType<User>;
 
     const payload = {

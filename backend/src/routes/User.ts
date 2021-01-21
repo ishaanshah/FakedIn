@@ -40,9 +40,10 @@ router.post("/update_user_info", function (req, res, next) {
         if (body.userType === "recruiter" || body.userType === "applicant") {
           user.userType = body.userType;
         } else {
-          const error = new APIError("userType not provided.");
-          error.status = 400;
-          throw error;
+          res
+            .status(StatusCodes.BAD_REQUEST)
+            .json({ message: "userType not provided or invalid." });
+          return;
         }
       }
       user.name = body.name;

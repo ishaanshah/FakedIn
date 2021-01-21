@@ -153,6 +153,39 @@ router.post(
       const { sop } = req.body;
 
       try {
+        // Check if active applications are less than 10
+        const activeApplications = await user.getActiveApplicationsCount();
+        if (activeApplications !== undefined && activeApplications > 10) {
+          res.status(StatusCodes.FORBIDDEN).json({
+            message: "You're allowed to have at max 10 active applications",
+          });
+          return;
+        }
+
+        // Check if already has been accepted in any other job
+        if (await user.isAccepted()) {
+          res.status(StatusCodes.FORBIDDEN).json({
+            message:
+              "Can't apply to new jobs as you have already been accepted into one",
+          });
+          return;
+        }
+
+        // Check if job max applications have been
+        // reached or deadline has been crossed
+        const job = await JobModel.findById(jobId);
+        if (!job) {
+          res.status(StatusCodes.NOT_FOUND).json({
+            message: "No job with the given jobId found",
+          });
+          return;
+        }
+        if ((await job.isFull()) || job.deadline < new Date()) {
+          res.status(StatusCodes.FORBIDDEN).json({
+            message: "This job is not accepting any new applications",
+          });
+        }
+
         await ApplicationModel.create({
           applicant: user._id,
           job: jobId,

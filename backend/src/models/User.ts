@@ -122,6 +122,24 @@ export class User {
     return await bcrypt.compare(password, this.password);
   }
 
+  public async isAccepted(this: DocumentType<User>) {
+    await this.populate({
+      path: "applications",
+      match: { status: "accepted" },
+    }).execPopulate();
+
+    return this.applications !== undefined && this.applications.length > 0;
+  }
+
+  public async getActiveApplicationsCount(this: DocumentType<User>) {
+    await this.populate({
+      path: "applications",
+      match: { $or: [{ status: "applied" }, { status: "shortlisted" }] },
+    }).execPopulate();
+
+    return this.applications?.length;
+  }
+
   public async getJobsPosted(
     this: DocumentType<User>,
     limit: number,

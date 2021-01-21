@@ -73,7 +73,19 @@ export class Job {
     localField: "_id",
     count: true,
   })
-  public applicationCount?: Array<Ref<Application>>;
+  public applicationCount?: number;
+
+  public async isFull(this: DocumentType<Job>) {
+    await this.populate("applicationCount").execPopulate();
+    await this.populate({
+      path: "applications",
+      match: { status: "accepted" },
+    }).execPopulate();
+    return (
+      (this.applicationCount as number) >= this.maxApplicants ||
+      (this.applications?.length as number) >= this.positions
+    );
+  }
 
   public async getPosterDetails(this: DocumentType<Job>) {
     await this.populate("postedBy").execPopulate();
