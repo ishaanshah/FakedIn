@@ -3,6 +3,7 @@ import { Router } from "express";
 import StatusCodes from "http-status-codes";
 import includes from "lodash/includes";
 import JobModel, { Job } from "src/models/Job";
+import ApplicationModel from "src/models/Application";
 import { User } from "src/models/User";
 import { completedRegistration } from "src/shared/functions";
 
@@ -135,6 +136,30 @@ router.post(
         });
 
         res.status(StatusCodes.OK).json({ message: "Job created succesfully" });
+      } catch (error) {
+        next(error);
+      }
+    })();
+  }
+);
+
+router.post(
+  "/apply/:jobId",
+  completedRegistration("applicant"),
+  function (req, res, next) {
+    (async function () {
+      const user = req.user as DocumentType<User>;
+      const { jobId } = req.params;
+      const { sop } = req.body;
+
+      try {
+        await ApplicationModel.create({
+          applicant: user._id,
+          job: jobId,
+          sop,
+        });
+
+        res.status(StatusCodes.OK).json({ message: "Application received" });
       } catch (error) {
         next(error);
       }

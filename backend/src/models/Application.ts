@@ -4,10 +4,12 @@ import {
   getModelForClass,
   DocumentType,
   isDocument,
+  index,
 } from "@typegoose/typegoose";
 import { Job } from "./Job";
 import { User } from "./User";
 
+@index({ applicant: 1, job: 1 }, { unique: true })
 export class Application {
   @prop({ required: true, ref: "User" })
   public applicant!: Ref<User>;
@@ -19,10 +21,10 @@ export class Application {
   public sop!: string;
 
   @prop({ required: true, default: () => new Date() })
-  public appliedOn!: Date;
+  public appliedOn?: Date;
 
   @prop({ required: true, default: "applied" })
-  public status!: "applied" | "shortlisted" | "rejected" | "accepted";
+  public status?: "applied" | "shortlisted" | "rejected" | "accepted";
 
   public async getApplicantDetails(this: DocumentType<Application>) {
     await this.populate("applicant").execPopulate();
@@ -39,6 +41,10 @@ export class Application {
 }
 
 const ApplicationModel = getModelForClass(Application, {
-  schemaOptions: { collection: "applications" },
+  schemaOptions: {
+    collection: "applications",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 });
 export default ApplicationModel;

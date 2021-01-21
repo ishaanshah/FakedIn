@@ -5,6 +5,7 @@ import {
   getModelForClass,
   Ref,
 } from "@typegoose/typegoose";
+import { Application } from "./Application";
 import { User } from "./User";
 
 export class Job {
@@ -63,6 +64,17 @@ export class Job {
   @prop({ required: true, min: 0, max: 5, default: 0 })
   public rating?: number;
 
+  @prop({ ref: "Application", foreignField: "job", localField: "_id" })
+  public applications?: Array<Ref<Application>>;
+
+  @prop({
+    ref: "Application",
+    foreignField: "job",
+    localField: "_id",
+    count: true,
+  })
+  public applicationCount?: Array<Ref<Application>>;
+
   public async getPosterDetails(this: DocumentType<Job>) {
     await this.populate("postedBy").execPopulate();
 
@@ -77,6 +89,10 @@ export class Job {
 }
 
 const JobModel = getModelForClass(Job, {
-  schemaOptions: { collection: "jobs" },
+  schemaOptions: {
+    collection: "jobs",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 });
 export default JobModel;

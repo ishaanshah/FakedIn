@@ -129,7 +129,8 @@ export class User {
   ) {
     await this.populate({
       path: "jobsPosted",
-      select: "title maxApplicants positions deadline",
+      select: "title maxApplicants positions deadline applicationCount",
+      populate: { path: "applicationCount" },
       match: { deadline: { $gte: new Date() } },
       options: { limit, skip: offset, sort: { postedOn: "desc" } },
     }).execPopulate();
@@ -143,6 +144,10 @@ export class User {
 }
 
 const UserModel = getModelForClass(User, {
-  schemaOptions: { collection: "users" },
+  schemaOptions: {
+    collection: "users",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 });
 export default UserModel;
