@@ -259,7 +259,9 @@ function ApplicantHome() {
               <Button
                 variant="dark"
                 onClick={() => setPage(page + 1)}
-                disabled={jobList.length === 0}
+                disabled={
+                  jobList.length === 0 || jobList.length < MAX_ITEMS_PER_PAGE
+                }
               >
                 Next
               </Button>

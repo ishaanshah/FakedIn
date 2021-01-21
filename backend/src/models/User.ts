@@ -147,8 +147,9 @@ export class User {
   ) {
     await this.populate({
       path: "jobsPosted",
-      select: "title maxApplicants positions deadline applicationCount",
-      match: { isActive: true },
+      select:
+        "title maxApplicants positions deadline applicationCount postedOn",
+      match: { isActive: undefined }, //TODO: change to true
       populate: { path: "applicationCount" },
       options: { limit, skip: offset, sort: { postedOn: "desc" } },
     }).execPopulate();
