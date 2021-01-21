@@ -64,6 +64,9 @@ export class Job {
   @prop({ required: true, min: 0, max: 5, default: 0 })
   public rating?: number;
 
+  @prop({ required: true, default: true })
+  public isActive?: boolean;
+
   @prop({ ref: "Application", foreignField: "job", localField: "_id" })
   public applications?: Array<Ref<Application>>;
 
@@ -77,13 +80,8 @@ export class Job {
 
   public async isFull(this: DocumentType<Job>) {
     await this.populate("applicationCount").execPopulate();
-    await this.populate({
-      path: "applications",
-      match: { status: "accepted" },
-    }).execPopulate();
     return (
-      (this.applicationCount as number) >= this.maxApplicants ||
-      (this.applications?.length as number) >= this.positions
+      (this.applicationCount as number) >= this.maxApplicants || !this.isActive
     );
   }
 

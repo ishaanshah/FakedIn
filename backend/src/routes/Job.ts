@@ -184,6 +184,7 @@ router.post(
           res.status(StatusCodes.FORBIDDEN).json({
             message: "This job is not accepting any new applications",
           });
+          return;
         }
 
         await ApplicationModel.create({

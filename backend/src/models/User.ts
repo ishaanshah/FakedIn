@@ -148,8 +148,8 @@ export class User {
     await this.populate({
       path: "jobsPosted",
       select: "title maxApplicants positions deadline applicationCount",
+      match: { isActive: true },
       populate: { path: "applicationCount" },
-      match: { deadline: { $gte: new Date() } },
       options: { limit, skip: offset, sort: { postedOn: "desc" } },
     }).execPopulate();
     return this.jobsPosted;
