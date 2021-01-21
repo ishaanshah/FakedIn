@@ -201,4 +201,50 @@ router.post(
   }
 );
 
+router.post(
+  "/delete_job",
+  completedRegistration("recruiter"),
+  function (req, res, next) {
+    (async function () {
+      const user = req.user as DocumentType<User>;
+      const { jobId } = req.body;
+
+      try {
+        const job = await JobModel.findById(jobId);
+        if (!job) {
+          res.status(StatusCodes.NOT_FOUND).json({
+            message: "No job with the given jobId found",
+          });
+          return;
+        }
+
+        if (String(job.postedBy) !== String(user._id)) {
+          res.status(StatusCodes.FORBIDDEN).json({
+            message: "Not authorized to delete the job",
+          });
+          return;
+        }
+
+        await ApplicationModel.deleteMany({ job: jobId });
+        await JobModel.deleteOne({ _id: jobId });
+        res.status(StatusCodes.OK).json({
+          message: "Job deleted succesfully",
+        });
+      } catch (error) {
+        next(error);
+      }
+    })();
+  }
+);
+
+router.get("/test/:jobId", function (req, res, next) {
+  (async function () {
+    const user = req.user as DocumentType<User>;
+    const { jobId } = req.params;
+    const job = await JobModel.findById(jobId);
+
+    res.status(200).json({ hey: await job?.isFull() });
+  })();
+});
+
 export default router;
