@@ -236,12 +236,6 @@ router.post(
           return;
         }
 
-        if (!job.isActive) {
-          res.status(StatusCodes.FORBIDDEN).json({
-            message: "Cannot delete an inactive job",
-          });
-        }
-
         if (String(job.postedBy) !== String(user._id)) {
           res.status(StatusCodes.FORBIDDEN).json({
             message: "Not authorized to delete the job",
@@ -249,8 +243,8 @@ router.post(
           return;
         }
 
-        await ApplicationModel.deleteMany({ job: jobId });
-        await JobModel.deleteOne({ _id: jobId });
+        job.isActive = false;
+        await job.save({ validateBeforeSave: true });
         res.status(StatusCodes.OK).json({
           message: "Job deleted succesfully",
         });
