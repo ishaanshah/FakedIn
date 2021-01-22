@@ -3,6 +3,7 @@ import Navbar from "../../components/Navbar";
 import PostJob from "./PostJob";
 import RecruiterHome from "./RecruiterHome";
 import RecruiterProfile from "./RecruiterProfile";
+import ApplicantList from "./ApplicantList";
 
 function RecruiterLayout() {
   return (
@@ -33,6 +34,9 @@ function RecruiterLayout() {
       </Route>
       <Route path="/recruiter/post_job" exact>
         <PostJob />
+      </Route>
+      <Route path="/recruiter/applications/:jobId">
+        <ApplicantList />
       </Route>
     </>
   );

@@ -204,6 +204,10 @@ router.post(
         // Mark job as inactive because all positions have been filled
         if (accepted === positions) {
           job.isActive = false;
+          await ApplicationModel.updateMany(
+            { job: job._id, status: { $ne: "accepted" } },
+            { status: "inactive" }
+          );
         }
 
         job.deadline = new Date(deadline);
@@ -244,7 +248,13 @@ router.post(
         }
 
         job.isActive = false;
+
         await job.save({ validateBeforeSave: true });
+        await ApplicationModel.updateMany(
+          { job: job._id },
+          { status: "inactive" }
+        );
+
         res.status(StatusCodes.OK).json({
           message: "Job deleted succesfully",
         });
@@ -313,14 +323,107 @@ router.post(
   }
 );
 
-router.get("/test/:jobId", function (req, res, next) {
-  (async function () {
-    const user = req.user as DocumentType<User>;
-    const { jobId } = req.params;
-    const job = await JobModel.findById(jobId);
+router.get(
+  "/get_applications/:jobId",
+  completedRegistration("recruiter"),
+  function (req, res, next) {
+    (async function () {
+      const user = req.user as DocumentType<User>;
+      let { offset = 0, limit = 10 } = req.query;
+      const { sortBy = "appliedOn", sortOrder = "asc" } = req.query;
 
-    res.status(200).json({ hey: await job?.isFull() });
-  })();
-});
+      const { jobId } = req.params;
+
+      try {
+        offset = Number(offset);
+        limit = Number(limit);
+
+        if (
+          isNaN(offset) ||
+          isNaN(limit) ||
+          !includes(["appliedOn", "name", "rating"], sortBy) ||
+          !includes(["asc", "desc"], sortOrder)
+        ) {
+          res.status(StatusCodes.BAD_REQUEST).json({ message: "Bad request" });
+          return;
+        }
+
+        const job = await JobModel.findById(jobId);
+        if (!job) {
+          res.status(StatusCodes.NOT_FOUND).json({
+            message: "No job with the given jobId found",
+          });
+          return;
+        }
+
+        if (!job.isActive) {
+          res.status(StatusCodes.FORBIDDEN).json({
+            message: "Cannot view applications for inactive job",
+          });
+        }
+
+        if (String(job.postedBy) !== String(user._id)) {
+          res.status(StatusCodes.FORBIDDEN).json({
+            message: "Not authorized to view applications for the job",
+          });
+          return;
+        }
+
+        let applications = [];
+        if (sortBy === "appliedOn") {
+          applications = await ApplicationModel.find({
+            job: job._id,
+            $and: [
+              { status: { $ne: "rejected" } },
+              { status: { $ne: "accepted" } },
+            ],
+          })
+            .select("_id")
+            .sort({ appliedOn: sortOrder })
+            .skip(offset)
+            .limit(limit);
+        } else {
+          applications = await ApplicationModel.aggregate([
+            {
+              $match: {
+                job: job._id,
+                $and: [
+                  { status: { $ne: "rejected" } },
+                  { status: { $ne: "accepted" } },
+                ],
+              },
+            },
+            {
+              $lookup: {
+                from: "users",
+                localField: "applicant",
+                foreignField: "_id",
+                as: "applicant",
+              },
+            },
+            {
+              $unwind: "$applicant",
+            },
+          ])
+            .sort({
+              [`applicant.${sortBy}`]: sortOrder,
+            })
+            .limit(limit)
+            .skip(offset);
+        }
+
+        res.status(StatusCodes.OK).json(
+          applications.map(({ _id }) => {
+            return {
+              applicationId: _id,
+            };
+          })
+        );
+      } catch (error) {
+        next(error);
+      }
+    })();
+  }
+);
 
 export default router;

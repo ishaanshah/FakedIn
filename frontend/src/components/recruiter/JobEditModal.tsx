@@ -1,13 +1,14 @@
 import axios from "axios";
-import DatePicker from "react-datepicker";
-import Button from "react-bootstrap/Button";
-import Modal from "react-bootstrap/Modal";
-import Form from "react-bootstrap/Form";
 import { useFormik } from "formik";
-import * as Yup from "yup";
-import Spinner from "react-bootstrap/Spinner";
 import { useState } from "react";
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Modal from "react-bootstrap/Modal";
+import Spinner from "react-bootstrap/Spinner";
+import DatePicker from "react-datepicker";
 import { store } from "react-notifications-component";
+import * as Yup from "yup";
 
 const EditJobSchema = Yup.object().shape({
   maxApplicants: Yup.number()
@@ -42,9 +43,9 @@ function ConfirmDeleteModal({
 
   const formik = useFormik({
     initialValues: {
-      maxApplicants,
-      positions,
-      deadline,
+      maxApplicants: maxApplicants || 1,
+      positions: positions || 1,
+      deadline: deadline || new Date(),
     },
     validationSchema: EditJobSchema,
     enableReinitialize: true,
@@ -97,7 +98,6 @@ function ConfirmDeleteModal({
       show={showModal}
       onHide={() => setShowModal(false)}
       contentClassName="justify-content-center"
-      size="sm"
       centered
     >
       {loading && (
@@ -111,38 +111,45 @@ function ConfirmDeleteModal({
         <Modal.Header>Update job details</Modal.Header>
         <div style={{ opacity: loading ? 0.5 : 1 }}>
           <Modal.Body>
-            <Form.Group controlId="maxApplicants">
-              <Form.Label>Max applications</Form.Label>
-              <Form.Control
-                value={formik.values.maxApplicants}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                isInvalid={
-                  formik.touched.maxApplicants && !!formik.errors.maxApplicants
-                }
-                placeholder="Max applications"
-                type="number"
-              />
-              <Form.Control.Feedback type="invalid">
-                {formik.errors.maxApplicants}
-              </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group controlId="positions">
-              <Form.Label>Positions</Form.Label>
-              <Form.Control
-                value={formik.values.positions}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                isInvalid={
-                  formik.touched.positions && !!formik.errors.positions
-                }
-                placeholder="Positions"
-                type="number"
-              />
-              <Form.Control.Feedback type="invalid">
-                {formik.errors.positions}
-              </Form.Control.Feedback>
-            </Form.Group>
+            <Form.Row>
+              <Col>
+                <Form.Group controlId="maxApplicants">
+                  <Form.Label>Max applications</Form.Label>
+                  <Form.Control
+                    value={formik.values.maxApplicants}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    isInvalid={
+                      formik.touched.maxApplicants &&
+                      !!formik.errors.maxApplicants
+                    }
+                    placeholder="Max applications"
+                    type="number"
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {formik.errors.maxApplicants}
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+              <Col>
+                <Form.Group controlId="positions">
+                  <Form.Label>Positions</Form.Label>
+                  <Form.Control
+                    value={formik.values.positions}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    isInvalid={
+                      formik.touched.positions && !!formik.errors.positions
+                    }
+                    placeholder="Positions"
+                    type="number"
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {formik.errors.positions}
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+            </Form.Row>
             <Form.Group controlId="deadline">
               <Form.Label>Deadline</Form.Label>
               <DatePicker

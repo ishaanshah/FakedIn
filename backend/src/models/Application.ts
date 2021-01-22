@@ -24,7 +24,12 @@ export class Application {
   public appliedOn?: Date;
 
   @prop({ required: true, default: "applied" })
-  public status?: "applied" | "shortlisted" | "rejected" | "accepted";
+  public status?:
+    | "applied"
+    | "shortlisted"
+    | "rejected"
+    | "accepted"
+    | "inactive";
 
   public async getApplicantDetails(this: DocumentType<Application>) {
     await this.populate("applicant").execPopulate();
@@ -35,6 +40,16 @@ export class Application {
         education: this.applicant.education,
         skills: this.applicant.skills,
         rating: this.applicant.rating,
+      };
+    }
+  }
+
+  public async getJobDetails(this: DocumentType<Application>) {
+    await this.populate("job").execPopulate();
+
+    if (isDocument(this.job)) {
+      return {
+        postedBy: this.job.postedBy,
       };
     }
   }
