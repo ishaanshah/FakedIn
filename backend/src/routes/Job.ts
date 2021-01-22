@@ -144,6 +144,124 @@ router.post(
 );
 
 router.post(
+  "/edit_job",
+  completedRegistration("recruiter"),
+  function (req, res, next) {
+    (async function () {
+      const user = req.user as DocumentType<User>;
+      const { jobId, deadline, maxApplicants, positions } = req.body;
+
+      try {
+        const job = await JobModel.findById(jobId);
+        if (!job) {
+          res.status(StatusCodes.NOT_FOUND).json({
+            message: "No job with the given jobId found",
+          });
+          return;
+        }
+
+        if (!job.isActive) {
+          res.status(StatusCodes.FORBIDDEN).json({
+            message: "Cannot edit an inactive job",
+          });
+        }
+
+        if (String(job.postedBy) !== String(user._id)) {
+          res.status(StatusCodes.FORBIDDEN).json({
+            message: "Not authorized to edit the job",
+          });
+          return;
+        }
+
+        await job.populate("applicationCount").execPopulate();
+        if ((job.applicationCount as number) > maxApplicants) {
+          res.status(StatusCodes.FORBIDDEN).json({
+            message: `Max application count should be more than or equal
+             to current number of applications`,
+          });
+          return;
+        }
+
+        const accepted = await ApplicationModel.find({
+          job: job._id,
+          status: "accepted",
+        }).count();
+        if (accepted > positions) {
+          res.status(StatusCodes.FORBIDDEN).json({
+            message: `Positions should be more than or equal to
+             current number of accepted applications`,
+          });
+          return;
+        }
+
+        if (job.deadline > new Date(deadline)) {
+          res.status(StatusCodes.FORBIDDEN).json({
+            message: "Updated deadline should be after previous deadline",
+          });
+          return;
+        }
+
+        // Mark job as inactive because all positions have been filled
+        if (accepted === positions) {
+          job.isActive = false;
+        }
+
+        job.deadline = new Date(deadline);
+        job.positions = positions;
+        job.maxApplicants = maxApplicants;
+
+        await job.save({ validateBeforeSave: true });
+        res.status(StatusCodes.OK).json({ message: "Job edited succesfully" });
+      } catch (error) {
+        next(error);
+      }
+    })();
+  }
+);
+
+router.post(
+  "/delete_job",
+  completedRegistration("recruiter"),
+  function (req, res, next) {
+    (async function () {
+      const user = req.user as DocumentType<User>;
+      const { jobId } = req.body;
+
+      try {
+        const job = await JobModel.findById(jobId);
+        if (!job) {
+          res.status(StatusCodes.NOT_FOUND).json({
+            message: "No job with the given jobId found",
+          });
+          return;
+        }
+
+        if (!job.isActive) {
+          res.status(StatusCodes.FORBIDDEN).json({
+            message: "Cannot delete an inactive job",
+          });
+        }
+
+        if (String(job.postedBy) !== String(user._id)) {
+          res.status(StatusCodes.FORBIDDEN).json({
+            message: "Not authorized to delete the job",
+          });
+          return;
+        }
+
+        await ApplicationModel.deleteMany({ job: jobId });
+        await JobModel.deleteOne({ _id: jobId });
+        res.status(StatusCodes.OK).json({
+          message: "Job deleted succesfully",
+        });
+      } catch (error) {
+        next(error);
+      }
+    })();
+  }
+);
+
+router.post(
   "/apply/:jobId",
   completedRegistration("applicant"),
   function (req, res, next) {
@@ -194,42 +312,6 @@ router.post(
         });
 
         res.status(StatusCodes.OK).json({ message: "Application received" });
-      } catch (error) {
-        next(error);
-      }
-    })();
-  }
-);
-
-router.post(
-  "/delete_job",
-  completedRegistration("recruiter"),
-  function (req, res, next) {
-    (async function () {
-      const user = req.user as DocumentType<User>;
-      const { jobId } = req.body;
-
-      try {
-        const job = await JobModel.findById(jobId);
-        if (!job) {
-          res.status(StatusCodes.NOT_FOUND).json({
-            message: "No job with the given jobId found",
-          });
-          return;
-        }
-
-        if (String(job.postedBy) !== String(user._id)) {
-          res.status(StatusCodes.FORBIDDEN).json({
-            message: "Not authorized to delete the job",
-          });
-          return;
-        }
-
-        await ApplicationModel.deleteMany({ job: jobId });
-        await JobModel.deleteOne({ _id: jobId });
-        res.status(StatusCodes.OK).json({
-          message: "Job deleted succesfully",
-        });
       } catch (error) {
         next(error);
       }

@@ -10,25 +10,27 @@ import Table from "react-bootstrap/Table";
 import { store } from "react-notifications-component";
 import { Link } from "react-router-dom";
 import ConfirmDeleteModal from "../../components/recruiter/ConfirmDeleteModal";
+import JobEditModal from "../../components/recruiter/JobEditModal";
 
 const MAX_ITEMS_PER_PAGE = 10;
 
+type jobEntry = {
+  _id: string;
+  postedOn: string;
+  deadline: string;
+  title: string;
+  maxApplicants: number;
+  applicationCount: number;
+  positions: number;
+};
+
 function RecruiterHome() {
-  const [jobList, setJobList] = useState<
-    Array<{
-      _id: string;
-      postedOn: string;
-      deadline: string;
-      title: string;
-      maxApplicants: number;
-      applicationCount: number;
-      positions: number;
-    }>
-  >([]);
+  const [jobList, setJobList] = useState<Array<jobEntry>>([]);
   const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedJob, setSelectedJob] = useState("");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<jobEntry>({} as jobEntry);
   const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
@@ -132,7 +134,14 @@ function RecruiterHome() {
                         </Link>
                       </td>
                       <td className="align-middle">
-                        <Button variant="outline-dark" size="sm">
+                        <Button
+                          variant="outline-dark"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedJob(entry);
+                            setShowEditModal(true);
+                          }}
+                        >
                           <PencilFill />
                         </Button>
                       </td>
@@ -141,8 +150,8 @@ function RecruiterHome() {
                           variant="outline-dark"
                           size="sm"
                           onClick={() => {
+                            setSelectedJob(entry);
                             setShowDeleteModal(true);
-                            setSelectedJob(entry._id);
                           }}
                         >
                           <TrashFill />
@@ -181,9 +190,19 @@ function RecruiterHome() {
       <ConfirmDeleteModal
         showModal={showDeleteModal}
         setShowModal={setShowDeleteModal}
-        jobId={selectedJob}
+        jobId={selectedJob._id}
         refresh={refresh}
         setRefresh={setRefresh}
+      />
+      <JobEditModal
+        showModal={showEditModal}
+        setShowModal={setShowEditModal}
+        jobId={selectedJob._id}
+        refresh={refresh}
+        setRefresh={setRefresh}
+        maxApplicants={selectedJob.maxApplicants?.valueOf()}
+        positions={selectedJob.positions?.valueOf()}
+        deadline={new Date(selectedJob.deadline || 0)}
       />
     </>
   );

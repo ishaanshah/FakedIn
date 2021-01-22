@@ -67,10 +67,10 @@ function ConfirmDeleteModal({
       <Modal.Header>Confirm deletion</Modal.Header>
       <Modal.Body>Are you sure you want to delete the job?</Modal.Body>
       <Modal.Footer>
-        <Button variant="outline-dark" onClick={() => setShowModal(false)}>
+        <Button variant="dark" onClick={() => setShowModal(false)}>
           Cancel
         </Button>
-        <Button variant="outline-danger" onClick={handleClick}>
+        <Button variant="danger" onClick={handleClick}>
           Delete
         </Button>
       </Modal.Footer>

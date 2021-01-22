@@ -101,10 +101,10 @@ function ApplyModal({ jobId, showModal, setShowModal }: ApplyModalProps) {
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="outline-dark" onClick={() => setShowModal(false)}>
+            <Button variant="dark" onClick={() => setShowModal(false)}>
               Close
             </Button>
-            <Button variant="outline-success" type="submit">
+            <Button variant="success" type="submit">
               Submit
             </Button>
           </Modal.Footer>
