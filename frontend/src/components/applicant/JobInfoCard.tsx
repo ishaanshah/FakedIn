@@ -21,6 +21,15 @@ const jobTypeMap: {
   home: "Work from home",
 };
 
+const colorIndex: any = {
+  apply: "dark",
+  applied: "primary",
+  shortlisted: "info",
+  rejected: "danger",
+  accepted: "success",
+  inactive: "secondary",
+};
+
 function JobInfoCard({ jobId }: JobInfoCardProps) {
   const [showModal, setShowModal] = useState(false);
   const [jobInfo, setJobInfo] = useState({
@@ -38,8 +47,10 @@ function JobInfoCard({ jobId }: JobInfoCardProps) {
     postedOn: new Date(),
     skillsRequired: [],
     rating: 0,
+    status: "",
   });
   const [loading, setLoading] = useState(true);
+  const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
     const getJobInfo = async () => {
@@ -58,7 +69,7 @@ function JobInfoCard({ jobId }: JobInfoCardProps) {
     };
 
     getJobInfo();
-  }, [jobId]);
+  }, [jobId, refresh]);
 
   return (
     <>
@@ -178,11 +189,14 @@ function JobInfoCard({ jobId }: JobInfoCardProps) {
               </Col>
               <Col className="text-right">
                 <Button
-                  variant="outline-dark"
+                  variant={`outline-${colorIndex[jobInfo.status]}`}
                   onClick={() => setShowModal(true)}
-                  disabled={loading}
+                  disabled={loading || jobInfo.status !== "apply"}
+                  style={{ textTransform: "capitalize" }}
                 >
-                  Apply
+                  {jobInfo.status === "inactive"
+                    ? "Full / Inactive"
+                    : jobInfo.status}
                 </Button>
               </Col>
             </Row>
@@ -194,6 +208,8 @@ function JobInfoCard({ jobId }: JobInfoCardProps) {
         showModal={showModal}
         setShowModal={setShowModal}
         jobId={jobId}
+        refresh={refresh}
+        setRefresh={setRefresh}
       />
     </>
   );

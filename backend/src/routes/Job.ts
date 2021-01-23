@@ -77,9 +77,10 @@ router.get("/", completedRegistration("any"), function (req, res, next) {
 
 router.get(
   "/get_job_info/:jobId",
-  completedRegistration("any"),
+  completedRegistration("applicant"),
   function (req, res, next) {
     (async function () {
+      const user = req.user as DocumentType<User>;
       const jobId = req.params.jobId;
 
       try {
@@ -91,6 +92,23 @@ router.get(
             .json({ message: "No job with given jobId found." });
 
           return;
+        }
+
+        let status = "";
+        if ((await job.isFull()) || !job.isActive) {
+          status = "inactive";
+        }
+
+        if (status === "") {
+          const application = await ApplicationModel.findOne({
+            job: job._id,
+            applicant: user._id,
+          });
+          if (!application) {
+            status = "apply";
+          } else {
+            status = application.status as string;
+          }
         }
 
         res.status(StatusCodes.OK).json({
@@ -106,6 +124,7 @@ router.get(
           duration: job.duration,
           salary: job.salary,
           rating: job.rating,
+          status,
         });
       } catch (error) {
         next(error);

@@ -12,13 +12,21 @@ type ApplyModalProps = {
   jobId: string;
   showModal: boolean;
   setShowModal: Function;
+  refresh: number;
+  setRefresh: (value: number) => void;
 };
 
 const ApplicationSchema = Yup.object().shape({
   sop: Yup.string().required().max(250).label("Statement of purpose"),
 });
 
-function ApplyModal({ jobId, showModal, setShowModal }: ApplyModalProps) {
+function ApplyModal({
+  jobId,
+  showModal,
+  setShowModal,
+  refresh,
+  setRefresh,
+}: ApplyModalProps) {
   const [loading, setLoading] = useState(false);
 
   const formik = useFormik({
@@ -45,6 +53,7 @@ function ApplyModal({ jobId, showModal, setShowModal }: ApplyModalProps) {
           },
         });
 
+        setRefresh(refresh + 1);
         setShowModal(false);
       } catch (error) {
         store.addNotification({

@@ -93,7 +93,7 @@ function RecruiterHome() {
       {!loading && applicationList.length === 0 && (
         <Row className="text-center mt-3">
           <Col>
-            <h4>Hmm, seems like you don't have any active job listings.</h4>
+            <h4>Hmm, seems like you haven't applied to any jobs yet.</h4>
           </Col>
         </Row>
       )}
