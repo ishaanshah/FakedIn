@@ -19,6 +19,7 @@ function ApplicantList() {
   const [sortBy, setSortBy] = useState("appliedOn");
   const [sortOrder, setSortOrder] = useState("asc");
   const [page, setPage] = useState<number>(1);
+  const [refresh, setRefresh] = useState<number>(1);
   const [loading, setLoading] = useState(true);
   const [applicationList, setApplicationList] = useState<
     Array<{ applicationId: string }>
@@ -63,7 +64,7 @@ function ApplicantList() {
     };
 
     getApplications();
-  }, [sortBy, sortOrder, page, jobId]);
+  }, [sortBy, sortOrder, page, jobId, refresh]);
 
   return (
     <Container className="mt-3 mb-2">
@@ -106,7 +107,11 @@ function ApplicantList() {
         applicationList.map((data) => (
           <Row className="mt-3" key={data.applicationId}>
             <Col>
-              <ApplicantInfoCard appId={data.applicationId} />
+              <ApplicantInfoCard
+                appId={data.applicationId}
+                refresh={refresh}
+                setRefresh={setRefresh}
+              />
             </Col>
           </Row>
         ))}

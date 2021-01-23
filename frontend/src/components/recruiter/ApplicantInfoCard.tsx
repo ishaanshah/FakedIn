@@ -8,9 +8,18 @@ import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 import Spinner from "react-bootstrap/Spinner";
 import { store } from "react-notifications-component";
+import ConfirmRejectModal from "./ConfirmRejectModal";
 
-function ApplicantInfoCard({ appId }: { appId: string }) {
-  const [showModal, setShowModal] = useState(false);
+function ApplicantInfoCard({
+  appId,
+  refresh,
+  setRefresh,
+}: {
+  appId: string;
+  refresh: number;
+  setRefresh: (value: number) => void;
+}) {
+  const [showRejectModal, setShowRejectModal] = useState(false);
   const [applicationInfo, setApplicationInfo] = useState({
     sop: "",
     appliedOn: "",
@@ -173,16 +182,16 @@ function ApplicantInfoCard({ appId }: { appId: string }) {
                   </Button>
                 )}
                 {applicationInfo.status === "shortlisted" && (
-                  <Button
-                    variant="outline-success"
-                    onClick={() => setShowModal(true)}
-                    disabled={loading}
-                  >
+                  <Button variant="outline-success" disabled={loading}>
                     Accept
                   </Button>
                 )}
                 &nbsp;&nbsp;&nbsp;
-                <Button variant="outline-danger" disabled={loading}>
+                <Button
+                  variant="outline-danger"
+                  disabled={loading}
+                  onClick={() => setShowRejectModal(true)}
+                >
                   Reject
                 </Button>
               </Col>
@@ -190,6 +199,13 @@ function ApplicantInfoCard({ appId }: { appId: string }) {
           </Card.Footer>
         </div>
       </Card>
+      <ConfirmRejectModal
+        appId={appId}
+        showModal={showRejectModal}
+        setShowModal={setShowRejectModal}
+        refresh={refresh}
+        setRefresh={setRefresh}
+      />
     </>
   );
 }
