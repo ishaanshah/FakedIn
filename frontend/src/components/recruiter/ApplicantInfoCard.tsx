@@ -7,18 +7,9 @@ import Card from "react-bootstrap/Card";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 import Spinner from "react-bootstrap/Spinner";
-import Table from "react-bootstrap/Table";
-import ApplyModal from "../applicant/ApplyModal";
+import { store } from "react-notifications-component";
 
-const jobTypeMap: {
-  [key: string]: string;
-} = {
-  full: "Full Time",
-  part: "Part Time",
-  home: "Work from home",
-};
-
-function JobInfoCard({ appId }: { appId: string }) {
+function ApplicantInfoCard({ appId }: { appId: string }) {
   const [showModal, setShowModal] = useState(false);
   const [applicationInfo, setApplicationInfo] = useState({
     sop: "",
@@ -57,6 +48,43 @@ function JobInfoCard({ appId }: { appId: string }) {
 
     getJobInfo();
   }, [appId]);
+
+  const shortlistApplicant = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`/api/applications/shortlist/${appId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      store.addNotification({
+        container: "bottom-right",
+        type: "success",
+        message: response.data.message,
+        dismiss: {
+          duration: 3000,
+          showIcon: true,
+        },
+      });
+      setApplicationInfo({ ...applicationInfo, status: "shortlisted" });
+    } catch (error) {
+      store.addNotification({
+        container: "bottom-right",
+        type: "danger",
+        message:
+          error?.response?.data?.message ||
+          error.message ||
+          error?.response?.statusText,
+        dismiss: {
+          duration: 3000,
+          showIcon: true,
+        },
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -138,7 +166,7 @@ function JobInfoCard({ appId }: { appId: string }) {
                 {applicationInfo.status === "applied" && (
                   <Button
                     variant="outline-info"
-                    onClick={() => setShowModal(true)}
+                    onClick={shortlistApplicant}
                     disabled={loading}
                   >
                     Shortlist
@@ -166,4 +194,4 @@ function JobInfoCard({ appId }: { appId: string }) {
   );
 }
 
-export default JobInfoCard;
+export default ApplicantInfoCard;
