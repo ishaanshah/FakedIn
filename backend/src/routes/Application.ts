@@ -47,6 +47,53 @@ router.get(
 );
 
 router.get(
+  "/accept/:appId",
+  completedRegistration("recruiter"),
+  function (req, res, next) {
+    (async function () {
+      const user = req.user as DocumentType<User>;
+      const { appId } = req.params;
+
+      try {
+        const application = await ApplicationModel.findById(appId);
+
+        if (!application) {
+          res.status(StatusCodes.NOT_FOUND).json({
+            message: "No application with the given appId found",
+          });
+          return;
+        }
+
+        const jobDetails = await application.getJobDetails();
+        if (String(jobDetails?.postedBy) !== String(user._id)) {
+          res.status(StatusCodes.FORBIDDEN).json({
+            message: "Not authorised to accept applicants for the given job",
+          });
+          return;
+        }
+
+        if (application.status !== "shortlisted") {
+          res.status(StatusCodes.FORBIDDEN).json({
+            message: `Cannot accept ${application.status as string} applicants`,
+          });
+          return;
+        }
+
+        application.status = "accepted";
+        application.joinedOn = new Date();
+        await application.save({ validateBeforeSave: true });
+
+        res
+          .status(StatusCodes.OK)
+          .json({ message: "Applicant accepted successfully" });
+      } catch (error) {
+        next(error);
+      }
+    })();
+  }
+);
+
+router.get(
   "/shortlist/:appId",
   completedRegistration("recruiter"),
   function (req, res, next) {

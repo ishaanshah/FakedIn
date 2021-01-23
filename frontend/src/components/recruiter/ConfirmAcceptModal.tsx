@@ -3,7 +3,7 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { store } from "react-notifications-component";
 
-function ConfirmRejectModal({
+function ConfirmAcceptModal({
   appId,
   showModal,
   setShowModal,
@@ -18,7 +18,7 @@ function ConfirmRejectModal({
 }) {
   const handleClick = async () => {
     try {
-      const response = await axios.get(`/api/applications/reject/${appId}`, {
+      const response = await axios.get(`/api/applications/accept/${appId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -60,18 +60,18 @@ function ConfirmRejectModal({
       size="sm"
       centered
     >
-      <Modal.Header>Confirm rejection</Modal.Header>
-      <Modal.Body>Are you sure you want to reject the applicant?</Modal.Body>
+      <Modal.Header>Confirm acceptance</Modal.Header>
+      <Modal.Body>Are you sure you want to accept the applicant?</Modal.Body>
       <Modal.Footer>
         <Button variant="dark" onClick={() => setShowModal(false)}>
           Cancel
         </Button>
-        <Button variant="danger" onClick={handleClick}>
-          Reject
+        <Button variant="success" onClick={handleClick}>
+          Accept
         </Button>
       </Modal.Footer>
     </Modal>
   );
 }
 
-export default ConfirmRejectModal;
+export default ConfirmAcceptModal;

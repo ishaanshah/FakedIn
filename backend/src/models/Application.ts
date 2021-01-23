@@ -31,6 +31,13 @@ export class Application {
     | "accepted"
     | "inactive";
 
+  @prop({
+    required: function () {
+      return (this as any).status === "accepted";
+    },
+  })
+  public joinedOn?: Date;
+
   public async getApplicantDetails(this: DocumentType<Application>) {
     await this.populate("applicant").execPopulate();
 
