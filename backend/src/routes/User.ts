@@ -1,8 +1,8 @@
 import { DocumentType } from "@typegoose/typegoose";
 import { Router } from "express";
 import StatusCodes from "http-status-codes";
+import ApplicationModel from "src/models/Application";
 import { User } from "src/models/User";
-import APIError from "src/shared/Error";
 import { completedRegistration } from "src/shared/functions";
 
 const router = Router();
@@ -86,6 +86,42 @@ router.get(
 
         const jobsPosted = await user.getJobsPosted(limit, offset);
         res.status(StatusCodes.OK).json(jobsPosted);
+      } catch (error) {
+        next(error);
+      }
+    })();
+  }
+);
+
+router.get(
+  "/get_applications",
+  completedRegistration("applicant"),
+  function (req, res, next) {
+    (async function () {
+      const user = req.user as DocumentType<User>;
+
+      let { limit = 25, offset = 0 } = req.query;
+      try {
+        limit = Number(limit);
+        offset = Number(offset);
+        if (isNaN(limit) || isNaN(offset)) {
+          res.status(StatusCodes.BAD_REQUEST).json({ message: "Bad request" });
+          return;
+        }
+
+        const applications = await ApplicationModel.find({
+          applicant: user._id,
+        })
+          .populate({
+            path: "job",
+            select: "title salary",
+            populate: {
+              path: "postedBy",
+              select: "name",
+            },
+          })
+          .sort({ appliedOn: "desc" });
+        res.status(StatusCodes.OK).json(applications);
       } catch (error) {
         next(error);
       }
