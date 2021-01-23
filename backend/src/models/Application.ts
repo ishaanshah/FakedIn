@@ -57,6 +57,7 @@ export class Application {
     if (isDocument(this.job)) {
       return {
         postedBy: this.job.postedBy,
+        positions: this.job.positions,
       };
     }
   }

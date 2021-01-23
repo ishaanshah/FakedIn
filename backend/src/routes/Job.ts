@@ -248,6 +248,7 @@ router.post(
         }
 
         job.isActive = false;
+        job.deadline = new Date(Date.now() + 5); // Update deadline so it doesnt appear in listings
 
         await job.save({ validateBeforeSave: true });
         await ApplicationModel.updateMany(
@@ -406,7 +407,7 @@ router.get(
             },
           ])
             .sort({
-              [`applicant.${sortBy}`]: sortOrder,
+              ["applicant." + sortBy]: sortOrder,
             })
             .limit(limit)
             .skip(offset);

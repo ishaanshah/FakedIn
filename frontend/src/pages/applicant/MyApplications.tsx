@@ -118,7 +118,7 @@ function RecruiterHome() {
                     <td className="align-middle">{idx + 1}</td>
                     <td className="align-middle">{entry.job.title}</td>
                     <td className="align-middle">
-                      {entry.joinedOn
+                      {entry.joinedOn && entry.status === "accepted"
                         ? new Date(entry.joinedOn).toLocaleString("en-IN", {
                             day: "numeric",
                             month: "long",

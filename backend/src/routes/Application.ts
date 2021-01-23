@@ -4,6 +4,7 @@ import { User } from "src/models/User";
 import StatusCodes from "http-status-codes";
 import ApplicationModel from "src/models/Application";
 import { completedRegistration } from "src/shared/functions";
+import JobModel from "src/models/Job";
 
 const router = Router();
 
@@ -82,6 +83,34 @@ router.get(
         application.status = "accepted";
         application.joinedOn = new Date();
         await application.save({ validateBeforeSave: true });
+
+        // Update other applications to be to rejected
+        await ApplicationModel.updateMany(
+          {
+            $or: [{ status: "applied" }, { status: "shortlisted" }],
+            applicant: application.applicant,
+          },
+          { status: "rejected" }
+        );
+
+        // Mark job as inactive because all positions have been filled
+        if (
+          jobDetails?.positions ===
+          (await ApplicationModel.find({
+            job: application.job,
+            status: "accepted",
+          }).count())
+        ) {
+          const job = await JobModel.findById(application.job);
+          if (job) {
+            job.isActive = false;
+            await ApplicationModel.updateMany(
+              { job: job._id, status: { $ne: "accepted" } },
+              { status: "inactive" }
+            );
+            await job.save({ validateBeforeSave: true });
+          }
+        }
 
         res
           .status(StatusCodes.OK)
