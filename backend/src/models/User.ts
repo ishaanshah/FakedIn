@@ -109,8 +109,23 @@ export class User {
   })
   public contact?: string;
 
-  @prop({ required: true, default: 0, min: 0, max: 5 })
+  @prop({
+    required: function () {
+      return (this as any).userType === "applicant";
+    },
+    default: 0,
+    min: 0,
+    max: 5,
+  })
   public rating?: number;
+
+  @prop({
+    required: function () {
+      return (this as any).userType === "applicant";
+    },
+    default: 0,
+  })
+  public ratingCount?: number;
 
   @prop({ ref: "Application", foreignField: "applicant", localField: "_id" })
   public applications?: Array<Ref<Application>>;

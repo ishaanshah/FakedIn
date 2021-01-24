@@ -64,6 +64,9 @@ export class Job {
   @prop({ required: true, min: 0, max: 5, default: 0 })
   public rating?: number;
 
+  @prop({ required: true, min: 0, default: 0 })
+  public ratingCount?: number;
+
   @prop({ required: true, default: true })
   public isActive?: boolean;
 

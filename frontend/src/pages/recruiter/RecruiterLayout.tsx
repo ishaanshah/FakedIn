@@ -4,6 +4,7 @@ import PostJob from "./PostJob";
 import RecruiterHome from "./RecruiterHome";
 import RecruiterProfile from "./RecruiterProfile";
 import ApplicantList from "./ApplicantList";
+import AcceptedList from "./AcceptedList";
 
 function RecruiterLayout() {
   return (
@@ -37,6 +38,9 @@ function RecruiterLayout() {
       </Route>
       <Route path="/recruiter/applications/:jobId">
         <ApplicantList />
+      </Route>
+      <Route path="/recruiter/accepted">
+        <AcceptedList />
       </Route>
     </>
   );

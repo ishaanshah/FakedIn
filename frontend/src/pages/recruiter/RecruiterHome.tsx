@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 import ConfirmDeleteModal from "../../components/recruiter/ConfirmDeleteModal";
 import JobEditModal from "../../components/recruiter/JobEditModal";
 
-const MAX_ITEMS_PER_PAGE = 10;
+const MAX_ITEMS_PER_PAGE = 25;
 
 type jobEntry = {
   _id: string;

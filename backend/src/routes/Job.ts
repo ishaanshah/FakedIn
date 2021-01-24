@@ -95,20 +95,18 @@ router.get(
         }
 
         let status = "";
-        if ((await job.isFull()) || !job.isActive) {
-          status = "inactive";
+        const application = await ApplicationModel.findOne({
+          job: job._id,
+          applicant: user._id,
+        });
+        if (!application) {
+          status = "apply";
+        } else {
+          status = application.status as string;
         }
 
-        if (status === "") {
-          const application = await ApplicationModel.findOne({
-            job: job._id,
-            applicant: user._id,
-          });
-          if (!application) {
-            status = "apply";
-          } else {
-            status = application.status as string;
-          }
+        if (((await job.isFull()) || !job.isActive) && status === "apply") {
+          status = "inactive";
         }
 
         res.status(StatusCodes.OK).json({

@@ -1,4 +1,5 @@
 import { DocumentType } from "@typegoose/typegoose";
+import includes from "lodash/includes";
 import { Router } from "express";
 import StatusCodes from "http-status-codes";
 import ApplicationModel from "src/models/Application";
@@ -122,6 +123,90 @@ router.get(
           })
           .sort({ appliedOn: "desc" });
         res.status(StatusCodes.OK).json(applications);
+      } catch (error) {
+        next(error);
+      }
+    })();
+  }
+);
+
+router.get(
+  "/get_accepted",
+  completedRegistration("recruiter"),
+  function (req, res, next) {
+    (async function () {
+      const user = req.user as DocumentType<User>;
+      let { offset = 0, limit = 10, sortBy = "joinedOn" } = req.query;
+      const { sortOrder = "desc" } = req.query;
+
+      try {
+        offset = Number(offset);
+        limit = Number(limit);
+
+        if (
+          isNaN(offset) ||
+          isNaN(limit) ||
+          !includes(["title", "name", "joinedOn", "rating"], sortBy) ||
+          !includes(["asc", "desc"], sortOrder)
+        ) {
+          res.status(StatusCodes.BAD_REQUEST).json({ message: "Bad request" });
+          return;
+        }
+
+        if (sortBy === "title") {
+          sortBy = "job.title";
+        } else if (sortBy === "rating" || sortBy === "name") {
+          sortBy = `applicant.${sortBy}`;
+        }
+
+        const accepted = await ApplicationModel.aggregate([
+          {
+            $match: {
+              status: "accepted",
+            },
+          },
+          {
+            $lookup: {
+              from: "jobs",
+              localField: "job",
+              foreignField: "_id",
+              as: "job",
+            },
+          },
+          {
+            $unwind: "$job",
+          },
+          {
+            $match: {
+              "job.postedBy": user._id,
+            },
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "applicant",
+              foreignField: "_id",
+              as: "applicant",
+            },
+          },
+          {
+            $unwind: "$applicant",
+          },
+          {
+            $project: {
+              joinedOn: true,
+              "job.title": true,
+              "applicant._id": true,
+              "applicant.name": true,
+              "applicant.rating": true,
+            },
+          },
+        ])
+          .sort({ [sortBy as string]: sortOrder })
+          .limit(limit)
+          .skip(offset);
+
+        res.status(StatusCodes.OK).json(accepted);
       } catch (error) {
         next(error);
       }
