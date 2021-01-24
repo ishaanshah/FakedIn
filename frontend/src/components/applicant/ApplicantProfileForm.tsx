@@ -1,4 +1,4 @@
-// TODO: Applicant form validation
+// TODO: Applicant form validation for educaiton field wise
 import { Field, FieldArray, FormikProvider, useFormik } from "formik";
 import { useContext } from "react";
 import { Plus, X } from "react-bootstrap-icons";
@@ -33,17 +33,19 @@ const ApplicantSchema = Yup.object().shape({
     .of(
       Yup.object().shape({
         institutionName: Yup.string().required().label("Institution name"),
-        startYear: Yup.number()
-          .integer()
-          .default(null)
-          .required()
-          .label("Start year"),
+        startYear: Yup.number().integer().required().min(0).label("Start year"),
         endYear: Yup.number()
           .integer()
-          .when("startYear", {
-            is: (startYear: number) => !!startYear,
-            then: Yup.number().min(Yup.ref("startYear") as any),
-          }),
+          .when(
+            "startYear",
+            (startYear: number, schema: any) =>
+              startYear &&
+              schema.min(
+                startYear,
+                "End year should be greater than or equal to start year"
+              )
+          )
+          .label("End year"),
       })
     )
     .min(1)
@@ -66,7 +68,6 @@ type ApplicantProfileFormProps = {
       endYear?: number | string;
     }>;
     skills: Array<string>;
-    //TODO: resume?: File;
   };
   setLoading: (loading: boolean) => void;
 };
@@ -86,6 +87,7 @@ function ApplicantProfileForm({
       setUser(user as User);
       setLoading(false);
     },
+    validationSchema: ApplicantSchema,
     enableReinitialize: true,
   });
 
@@ -100,7 +102,11 @@ function ApplicantProfileForm({
             value={formik.values.name}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
+            isInvalid={formik.touched.name && !!formik.errors.name}
           />
+          <Form.Control.Feedback type="invalid">
+            formik.errors.name
+          </Form.Control.Feedback>
         </Form.Group>
         <Card.Title>Education</Card.Title>
         <FieldArray name="education">
@@ -118,6 +124,9 @@ function ApplicantProfileForm({
                         placeholder="Institution Name"
                         value={entry.institutionName}
                         onChange={formik.handleChange}
+                        isInvalid={
+                          formik.touched.education && !!formik.errors.education
+                        }
                       />
                     </Field>
                   </Col>
@@ -131,6 +140,9 @@ function ApplicantProfileForm({
                         placeholder="Start Year"
                         value={entry.startYear}
                         onChange={formik.handleChange}
+                        isInvalid={
+                          formik.touched.education && !!formik.errors.education
+                        }
                       />
                     </Field>
                   </Col>
@@ -144,6 +156,9 @@ function ApplicantProfileForm({
                         placeholder="End Year"
                         value={entry.endYear}
                         onChange={formik.handleChange}
+                        isInvalid={
+                          formik.touched.education && !!formik.errors.education
+                        }
                       />
                     </Field>
                   </Col>
@@ -187,24 +202,6 @@ function ApplicantProfileForm({
             multiple
           />
         </Form.Group>
-        {/* TODO:
-          <Card.Title>Resume</Card.Title>
-          <Form.Group controlId="resume">
-            <Form.File
-              label={
-                formik.values.resume
-                ? formik.values.resume.name
-                : "Upload your resume"
-              }
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                if (event.currentTarget.files?.length) {
-                  formik.setFieldValue("resume", event.currentTarget.files[0]);
-                }
-              }}
-              custom
-            />
-          </Form.Group>
-          */}
         <Button variant="dark" type="submit">
           Continue
         </Button>

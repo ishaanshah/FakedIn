@@ -1,5 +1,3 @@
-// TODO: Refactor user context into forms
-// TODO: Allow to edit E-Mail
 import { useState, useContext, useEffect } from "react";
 import UserContext from "../contexts/UserContext";
 import Card from "react-bootstrap/Card";
