@@ -85,12 +85,10 @@ router.get(
 
       try {
         const job = await JobModel.findById(jobId);
-
         if (!job) {
           res
             .status(StatusCodes.NOT_FOUND)
             .json({ message: "No job with given jobId found." });
-
           return;
         }
 
@@ -437,6 +435,44 @@ router.get(
             };
           })
         );
+      } catch (error) {
+        next(error);
+      }
+    })();
+  }
+);
+
+router.post(
+  "/rate/:jobId",
+  completedRegistration("applicant"),
+  function (req, res, next) {
+    (async function () {
+      const { jobId } = req.params;
+      let { rating } = req.body;
+
+      try {
+        rating = Number(rating);
+        if (isNaN(rating) || rating < 0 || rating > 5) {
+          res.status(StatusCodes.FORBIDDEN).json({ message: "Bad request" });
+          return;
+        }
+
+        const job = await JobModel.findById(jobId);
+        if (!job) {
+          res
+            .status(StatusCodes.NOT_FOUND)
+            .json({ message: "No job with given jobId found." });
+          return;
+        }
+
+        job.rating =
+          (job.ratingCount! * job.rating! + rating) / (job.ratingCount! + 1);
+        job.ratingCount! += 1;
+
+        await job.save({ validateBeforeSave: true });
+        res
+          .status(StatusCodes.OK)
+          .json({ message: "Rating submitted succesfully" });
       } catch (error) {
         next(error);
       }

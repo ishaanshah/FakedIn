@@ -7,6 +7,7 @@ import Spinner from "react-bootstrap/Spinner";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import { store } from "react-notifications-component";
+import RateModal from "../../components/RateModal";
 
 const MAX_ITEMS_PER_PAGE = 25;
 
@@ -77,108 +78,118 @@ function RecruiterHome() {
   }, [page]);
 
   return (
-    <Container className="mt-3 mb-2">
-      <Row className="mb-2">
-        <Col>
-          <h1>Your applications</h1>
-        </Col>
-      </Row>
-      {loading && (
-        <Row className="text-center">
+    <>
+      <Container className="mt-3 mb-2">
+        <Row className="mb-2">
           <Col>
-            <Spinner animation="border" />
+            <h1>Your applications</h1>
           </Col>
         </Row>
-      )}
-      {!loading && applicationList.length === 0 && (
-        <Row className="text-center mt-3">
-          <Col>
-            <h4>Hmm, seems like you haven't applied to any jobs yet.</h4>
-          </Col>
-        </Row>
-      )}
-      {!loading && applicationList.length > 0 && (
-        <Row style={{ opacity: loading ? 0.5 : 1 }}>
-          <Col>
-            <Table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Job title</th>
-                  <th>Date of joining</th>
-                  <th>Salary (&#8377;/Month)</th>
-                  <th>Recruiter name</th>
-                  <th>Status</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {applicationList.map((entry, idx) => (
-                  <tr key={entry._id}>
-                    <td className="align-middle">{idx + 1}</td>
-                    <td className="align-middle">{entry.job.title}</td>
-                    <td className="align-middle">
-                      {entry.joinedOn && entry.status === "accepted"
-                        ? new Date(entry.joinedOn).toLocaleString("en-IN", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })
-                        : "N/A"}
-                    </td>
-                    <td className="align-middle">{entry.job.salary}</td>
-                    <td className="align-middle">{entry.job.postedBy.name}</td>
-                    <td
-                      style={{ textTransform: "capitalize" }}
-                      className={`align-middle text-${
-                        colorIndex[entry.status]
-                      }`}
-                    >
-                      {entry.status}
-                    </td>
-                    <td className="align-middle">
-                      <Button
-                        variant="outline-dark"
-                        onClick={() => {
-                          setSelectedApp(entry.job._id);
-                          setShowRateModal(true);
-                        }}
-                        disabled={entry.status !== "accepted"}
-                      >
-                        Rate job
-                      </Button>
-                    </td>
+        {loading && (
+          <Row className="text-center">
+            <Col>
+              <Spinner animation="border" />
+            </Col>
+          </Row>
+        )}
+        {!loading && applicationList.length === 0 && (
+          <Row className="text-center mt-3">
+            <Col>
+              <h4>Hmm, seems like you haven't applied to any jobs yet.</h4>
+            </Col>
+          </Row>
+        )}
+        {!loading && applicationList.length > 0 && (
+          <Row style={{ opacity: loading ? 0.5 : 1 }}>
+            <Col>
+              <Table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Job title</th>
+                    <th>Date of joining</th>
+                    <th>Salary (&#8377;/Month)</th>
+                    <th>Recruiter name</th>
+                    <th>Status</th>
+                    <th />
                   </tr>
-                ))}
-              </tbody>
-            </Table>
+                </thead>
+                <tbody>
+                  {applicationList.map((entry, idx) => (
+                    <tr key={entry._id}>
+                      <td className="align-middle">{idx + 1}</td>
+                      <td className="align-middle">{entry.job.title}</td>
+                      <td className="align-middle">
+                        {entry.joinedOn && entry.status === "accepted"
+                          ? new Date(entry.joinedOn).toLocaleString("en-IN", {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })
+                          : "N/A"}
+                      </td>
+                      <td className="align-middle">{entry.job.salary}</td>
+                      <td className="align-middle">
+                        {entry.job.postedBy.name}
+                      </td>
+                      <td
+                        style={{ textTransform: "capitalize" }}
+                        className={`align-middle text-${
+                          colorIndex[entry.status]
+                        }`}
+                      >
+                        {entry.status}
+                      </td>
+                      <td className="align-middle">
+                        <Button
+                          variant="outline-dark"
+                          onClick={() => {
+                            setSelectedApp(entry.job._id);
+                            setShowRateModal(true);
+                          }}
+                          disabled={entry.status !== "accepted"}
+                        >
+                          Rate job
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </Col>
+          </Row>
+        )}
+        <Row className="mt-4">
+          <Col>
+            <Button
+              variant="dark"
+              onClick={() => setPage(page - 1)}
+              disabled={page <= 1}
+            >
+              Previous
+            </Button>
+          </Col>
+          <Col className="text-right">
+            <Button
+              variant="dark"
+              onClick={() => setPage(page + 1)}
+              disabled={
+                applicationList.length === 0 ||
+                applicationList.length < MAX_ITEMS_PER_PAGE
+              }
+            >
+              Next
+            </Button>
           </Col>
         </Row>
-      )}
-      <Row className="mt-4">
-        <Col>
-          <Button
-            variant="dark"
-            onClick={() => setPage(page - 1)}
-            disabled={page <= 1}
-          >
-            Previous
-          </Button>
-        </Col>
-        <Col className="text-right">
-          <Button
-            variant="dark"
-            onClick={() => setPage(page + 1)}
-            disabled={
-              applicationList.length === 0 ||
-              applicationList.length < MAX_ITEMS_PER_PAGE
-            }
-          >
-            Next
-          </Button>
-        </Col>
-      </Row>
-    </Container>
+      </Container>
+      <RateModal
+        variant="applicant"
+        showModal={showRateModal}
+        setShowModal={setShowRateModal}
+        id={selectedApp}
+      />
+    </>
   );
 }
 
