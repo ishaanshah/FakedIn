@@ -11,6 +11,7 @@ import Row from "react-bootstrap/Row";
 import Spinner from "react-bootstrap/Spinner";
 import Table from "react-bootstrap/Table";
 import { store } from "react-notifications-component";
+import RateModal from "../../components/RateModal";
 
 const MAX_ITEMS_PER_PAGE = 25;
 
@@ -210,6 +211,12 @@ function AcceptedList() {
           </Col>
         </Row>
       </Container>
+      <RateModal
+        showModal={showRateModal}
+        setShowModal={setShowRateModal}
+        id={selectedEntry}
+        variant="recruiter"
+      />
     </>
   );
 }

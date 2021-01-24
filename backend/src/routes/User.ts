@@ -3,7 +3,7 @@ import includes from "lodash/includes";
 import { Router } from "express";
 import StatusCodes from "http-status-codes";
 import ApplicationModel from "src/models/Application";
-import { User } from "src/models/User";
+import UserModel, { User } from "src/models/User";
 import { completedRegistration } from "src/shared/functions";
 
 const router = Router();
@@ -207,6 +207,50 @@ router.get(
           .skip(offset);
 
         res.status(StatusCodes.OK).json(accepted);
+      } catch (error) {
+        next(error);
+      }
+    })();
+  }
+);
+
+router.post(
+  "/rate/:userId",
+  completedRegistration("recruiter"),
+  function (req, res, next) {
+    (async function () {
+      const { userId } = req.params;
+      let { rating } = req.body;
+
+      try {
+        rating = Number(rating);
+        if (isNaN(rating) || rating < 0 || rating > 5) {
+          res.status(StatusCodes.FORBIDDEN).json({ message: "Bad request" });
+          return;
+        }
+
+        const user = await UserModel.findById(userId);
+        if (!user) {
+          res
+            .status(StatusCodes.NOT_FOUND)
+            .json({ message: "No user with given userId found." });
+          return;
+        }
+
+        if (user.userType !== "applicant") {
+          res
+            .status(StatusCodes.FORBIDDEN)
+            .json({ message: `Cannot rate user of type ${user.userType}` });
+        }
+
+        user.rating =
+          (user.ratingCount! * user.rating! + rating) / (user.ratingCount! + 1);
+        user.ratingCount! += 1;
+
+        await user.save({ validateBeforeSave: true });
+        res
+          .status(StatusCodes.OK)
+          .json({ message: "Rating submitted succesfully" });
       } catch (error) {
         next(error);
       }
